@@ -1,2 +1,5 @@
 node_modules
 .env
+.env.template
+.env.uvend.production
+.env.uvend.template
