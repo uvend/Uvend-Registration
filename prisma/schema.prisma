@@ -1,0 +1,90 @@
+// Prisma schema for registration flow
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Registration {
+  id            String         @id @default(cuid())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  type          String
+
+  // Personal
+  firstName     String
+  lastName      String
+  email         String
+  phone         String?
+  idNumber      String?
+  dateOfBirth   String?
+
+  // Banking
+  bankName      String?
+  accountNumber String?
+  accountHolder String?
+  branchCode    String?
+  accountType   String?
+
+  // Address (flattened for now)
+  streetAddress String?
+  suburb        String?
+  city          String?
+  province      String?
+  postalCode    String?
+
+  // One-to-many
+  meters        Meter[]
+  complexes     Complex[]
+  documents     Document[]
+}
+
+model Meter {
+  id            String       @id @default(cuid())
+  createdAt     DateTime     @default(now())
+
+  meterNumber   String
+  utilityType   String
+  location      String?
+  isActive      Boolean      @default(true)
+
+  // Unit info
+  unitNumber    String?
+  unitType      String?
+  hasTenant     Boolean      @default(false)
+  tenantName    String?
+  tenantPhone   String?
+  tenantEmail   String?
+  leaseStart    String?
+  leaseEnd      String?
+
+  registration  Registration @relation(fields: [registrationId], references: [id])
+  registrationId String
+}
+
+model Complex {
+  id            String       @id @default(cuid())
+  name          String
+  unitCount     Int
+  address       String
+
+  registration  Registration @relation(fields: [registrationId], references: [id])
+  registrationId String
+}
+
+model Document {
+  id            String       @id @default(cuid())
+  kind          String       // idDocument | proofOfAddress | additional
+  fileName      String?
+  mimeType      String?
+  // Store only metadata/placeholder; actual files should be stored externally later
+  url           String?
+
+  registration  Registration @relation(fields: [registrationId], references: [id])
+  registrationId String
+}

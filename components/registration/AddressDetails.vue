@@ -3,7 +3,7 @@
     <div class="space-y-6">
       <div class="flex items-center gap-3 mb-6">
         <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-          <Icon name="lucide:map-pin" class="w-5 h-5 text-blue-600" />
+          <MapPin class="w-5 h-5 text-blue-600" />
         </div>
         <div>
           <h2 class="text-2xl font-bold text-gray-900">Address Details</h2>
@@ -32,7 +32,6 @@
               'border-green-500 focus:ring-green-500': formData.streetAddress && !errors.streetAddress
             }"
             aria-describedby="streetAddress-error streetAddress-hint"
-            @input="handleDataChange"
           />
           <p id="streetAddress-hint" class="text-xs text-gray-500">Include your street name and building number</p>
           <span 
@@ -63,7 +62,6 @@
               'border-green-500 focus:ring-green-500': formData.suburb && !errors.suburb
             }"
             aria-describedby="suburb-error"
-            @input="handleDataChange"
           />
           <span 
             v-if="errors.suburb" 
@@ -93,8 +91,7 @@
                 'border-red-500 focus:ring-red-500': errors.city,
                 'border-green-500 focus:ring-green-500': formData.city && !errors.city
               }"
-              aria-describedby="city-error"
-              @input="handleDataChange"
+            aria-describedby="city-error"
             />
             <span 
               v-if="errors.city" 
@@ -123,8 +120,7 @@
                 'border-red-500 focus:ring-red-500': errors.province,
                 'border-green-500 focus:ring-green-500': formData.province && !errors.province
               }"
-              aria-describedby="province-error"
-              @input="handleDataChange"
+            aria-describedby="province-error"
             />
             <span 
               v-if="errors.province" 
@@ -214,7 +210,6 @@
                   :class="{ 
                     'border-red-500': errors[`complexes.${index}.name`]
                   }"
-                  @input="handleDataChange"
                 />
                 <span 
                   v-if="errors[`complexes.${index}.name`]" 
@@ -235,7 +230,6 @@
                   :class="{ 
                     'border-red-500': errors[`complexes.${index}.address`]
                   }"
-                  @input="handleDataChange"
                 />
                 <span 
                   v-if="errors[`complexes.${index}.address`]" 
@@ -257,7 +251,6 @@
                   :class="{ 
                     'border-red-500': errors[`complexes.${index}.unitCount`]
                   }"
-                  @input="handleDataChange"
                 />
                 <span 
                   v-if="errors[`complexes.${index}.unitCount`]" 
@@ -277,11 +270,11 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import Label from '~/components/ui/label.vue'
 import Input from '~/components/ui/input.vue'
 import Button from '~/components/ui/button.vue'
-import { AlertCircle, PlusIcon, TrashIcon } from 'lucide-vue-next'
+import { AlertCircle, PlusIcon, TrashIcon, MapPin } from 'lucide-vue-next'
 
 const props = defineProps({
   registrationData: {
@@ -292,7 +285,7 @@ const props = defineProps({
 
 const emit = defineEmits(['dataChange'])
 
-const formData = ref({
+const defaultAddressState = () => ({
   streetAddress: '',
   suburb: '',
   city: '',
@@ -301,22 +294,33 @@ const formData = ref({
   complexes: []
 })
 
-const errors = ref({})
+const formData = ref(defaultAddressState())
 
-// Initialize form data from props if available
+const isSyncingFromProps = ref(false)
+
+// Initialize / sync form data from props if available
 watch(() => props.registrationData?.address, (newValue) => {
-  if (newValue) {
-    formData.value = { ...newValue }
-    if (!formData.value.complexes) {
-      formData.value.complexes = []
-    }
+  if (!newValue) {
+    return
   }
-}, { immediate: true })
+
+  isSyncingFromProps.value = true
+  const synced = {
+    ...defaultAddressState(),
+    ...JSON.parse(JSON.stringify(newValue))
+  }
+
+  if (!Array.isArray(synced.complexes)) {
+    synced.complexes = []
+  }
+
+  formData.value = synced
+  isSyncingFromProps.value = false
+}, { immediate: true, deep: true })
 
 // Format postal code to only allow numbers
 const formatPostalCode = (event) => {
   formData.value.postalCode = event.target.value.replace(/\D/g, '').slice(0, 4)
-  handleDataChange()
 }
 
 const addComplex = () => {
@@ -325,71 +329,64 @@ const addComplex = () => {
     address: '',
     unitCount: null
   })
-  handleDataChange()
 }
 
 const removeComplex = (index) => {
   formData.value.complexes.splice(index, 1)
-  handleDataChange()
 }
 
-const handleDataChange = () => {
-  // Emit the data to parent
-  emit('dataChange', { ...formData.value })
-}
-
-// Validate form data before submitting
-watch(formData, (newValue) => {
+const errors = computed(() => {
+  const currentValue = formData.value
   const newErrors = {}
   
-  // Validate main address
-  if (!newValue.streetAddress) {
+  // Validate main address - 1+ character for most fields
+  if (!currentValue.streetAddress || currentValue.streetAddress.trim().length === 0) {
     newErrors.streetAddress = 'Street address is required'
-  } else if (newValue.streetAddress.length < 5) {
-    newErrors.streetAddress = 'Please enter a complete street address'
   }
 
-  if (!newValue.suburb) {
+  if (!currentValue.suburb || currentValue.suburb.trim().length === 0) {
     newErrors.suburb = 'Suburb is required'
-  } else if (newValue.suburb.length < 2) {
-    newErrors.suburb = 'Please enter a valid suburb name'
   }
 
-  if (!newValue.city) {
+  if (!currentValue.city || currentValue.city.trim().length === 0) {
     newErrors.city = 'City is required'
-  } else if (newValue.city.length < 2) {
-    newErrors.city = 'Please enter a valid city name'
   }
 
-  if (!newValue.province) {
+  if (!currentValue.province || currentValue.province.trim().length === 0) {
     newErrors.province = 'Province is required'
-  } else if (newValue.province.length < 2) {
-    newErrors.province = 'Please enter a valid province name'
   }
 
-  if (!newValue.postalCode) {
+  // Postal code - explicit limit: exactly 4 digits
+  if (!currentValue.postalCode || currentValue.postalCode.trim().length === 0) {
     newErrors.postalCode = 'Postal code is required'
-  } else if (!/^\d{4}$/.test(newValue.postalCode)) {
+  } else if (!/^\d{4}$/.test(currentValue.postalCode)) {
     newErrors.postalCode = 'Please enter a valid 4-digit postal code'
   }
 
-  // Validate complexes
-  newValue.complexes.forEach((complex, index) => {
-    if (!complex.name) {
+  // Validate complexes - only if complex exists (optional, but if added, fields are required)
+  currentValue.complexes.forEach((complex, index) => {
+    if (!complex.name || complex.name.trim().length === 0) {
       newErrors[`complexes.${index}.name`] = 'Complex name is required'
     }
-    if (!complex.address) {
+    if (!complex.address || complex.address.trim().length === 0) {
       newErrors[`complexes.${index}.address`] = 'Complex address is required'
     }
-    if (!complex.unitCount) {
-      newErrors[`complexes.${index}.unitCount`] = 'Number of units is required'
-    } else if (complex.unitCount < 1) {
-      newErrors[`complexes.${index}.unitCount`] = 'Number of units must be at least 1'
+    if (!complex.unitCount || complex.unitCount < 1) {
+      newErrors[`complexes.${index}.unitCount`] = 'Number of units is required and must be at least 1'
     }
   })
 
-  errors.value = newErrors
-}, { deep: true })
+  return newErrors
+})
+
+// Emit whenever the form changes (skip when syncing from props)
+watch(formData, (newValue) => {
+  if (isSyncingFromProps.value) {
+    return
+  }
+
+  emit('dataChange', JSON.parse(JSON.stringify(newValue)))
+}, { deep: true, immediate: false })
 
 // Expose form data to parent
 defineExpose({

@@ -3,7 +3,7 @@
     <div class="space-y-6">
       <div class="flex items-center gap-3 mb-6">
         <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-          <Icon name="lucide:file-up" class="w-5 h-5 text-blue-600" />
+          <Upload class="w-5 h-5 text-blue-600" />
         </div>
         <div>
           <h2 class="text-2xl font-bold text-gray-900">Document Upload</h2>
@@ -26,10 +26,10 @@
               <div class="text-sm text-gray-600">
                 <label for="idDocument" class="relative cursor-pointer rounded-md font-semibold text-blue-600 hover:text-blue-700 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
                   <span>Upload ID document</span>
-                  <input id="idDocument" name="idDocument" type="file" class="sr-only" @change="handleFileUpload($event, 'idDocument')" accept=".pdf,.jpg,.jpeg,.png">
+                  <input id="idDocument" name="idDocument" type="file" class="sr-only" @change="handleFileUpload($event, 'idDocument')" accept=".pdf">
                 </label>
                 <p class="mt-1">or drag and drop</p>
-                <p class="text-xs text-gray-500 mt-2">PDF, JPG, PNG up to 10MB</p>
+                <p class="text-xs text-gray-500 mt-2">PDF only, up to 10MB</p>
               </div>
             </div>
             
@@ -63,10 +63,10 @@
               <div class="text-sm text-gray-600">
                 <label for="proofOfAddress" class="relative cursor-pointer rounded-md font-semibold text-blue-600 hover:text-blue-700 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
                   <span>Upload proof of address</span>
-                  <input id="proofOfAddress" name="proofOfAddress" type="file" class="sr-only" @change="handleFileUpload($event, 'proofOfAddress')" accept=".pdf,.jpg,.jpeg,.png">
+                  <input id="proofOfAddress" name="proofOfAddress" type="file" class="sr-only" @change="handleFileUpload($event, 'proofOfAddress')" accept=".pdf">
                 </label>
                 <p class="mt-1">or drag and drop</p>
-                <p class="text-xs text-gray-500 mt-2">PDF, JPG, PNG up to 10MB</p>
+                <p class="text-xs text-gray-500 mt-2">PDF only, up to 10MB</p>
               </div>
             </div>
             
@@ -128,7 +128,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import Label from '~/components/ui/label.vue'
 import { Upload, FileCheck, AlertCircle } from 'lucide-vue-next'
 
@@ -141,33 +141,42 @@ const props = defineProps({
 
 const emit = defineEmits(['dataChange'])
 
-const formData = ref({
+const defaultDocumentState = () => ({
   idDocument: null,
   proofOfAddress: null,
   bankStatement: null
 })
 
-const errors = ref({})
+const formData = ref(defaultDocumentState())
+const isSyncingFromProps = ref(false)
+const manualErrors = ref({})
 
 // Initialize form data from props if available
 watch(() => props.registrationData?.documents, (newValue) => {
-  if (newValue) {
-    formData.value = { ...newValue }
+  if (!newValue) {
+    return
   }
-}, { immediate: true })
+
+  isSyncingFromProps.value = true
+  formData.value = {
+    ...defaultDocumentState(),
+    ...newValue
+  }
+  isSyncingFromProps.value = false
+}, { immediate: true, deep: true })
 
 const validateFile = (file) => {
   if (!file) return false
   
   const maxSize = 10 * 1024 * 1024 // 10MB
-  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png']
+  const allowedTypes = ['application/pdf']
   
   if (file.size > maxSize) {
     return 'File size must be less than 10MB'
   }
   
   if (!allowedTypes.includes(file.type)) {
-    return 'File must be PDF, JPG, or PNG'
+    return 'File must be PDF format only'
   }
   
   return true
@@ -180,46 +189,68 @@ const handleFileUpload = (event, field) => {
   const validation = validateFile(file)
   if (validation === true) {
     formData.value[field] = file
-    errors.value[field] = ''
-    handleDataChange()
+    if (manualErrors.value[field]) {
+      const updated = { ...manualErrors.value }
+      delete updated[field]
+      manualErrors.value = updated
+    }
   } else {
-    errors.value[field] = validation
+    manualErrors.value = { ...manualErrors.value, [field]: validation }
   }
 }
 
 const removeFile = (field) => {
   formData.value[field] = null
-  handleDataChange()
+  if (manualErrors.value[field]) {
+    const updated = { ...manualErrors.value }
+    delete updated[field]
+    manualErrors.value = updated
+  }
 }
 
-const handleDataChange = () => {
-  // Emit the data to parent
-  emit('dataChange', { documents: { ...formData.value } })
-}
-
-// Validate form data
-watch(formData, (newValue) => {
+const errors = computed(() => {
+  const current = formData.value
   const newErrors = {}
   
-  if (!newValue.idDocument) {
+  if (!current.idDocument) {
     newErrors.idDocument = 'ID document is required'
   }
-  if (!newValue.proofOfAddress) {
+  if (!current.proofOfAddress) {
     newErrors.proofOfAddress = 'Proof of address is required'
   }
-  if (!newValue.bankStatement) {
+  if (!current.bankStatement) {
     newErrors.bankStatement = 'Bank statement is required'
   }
 
-  errors.value = newErrors
-}, { deep: true })
+  return {
+    ...newErrors,
+    ...manualErrors.value
+  }
+})
+
+const emitDocuments = () => {
+  if (isSyncingFromProps.value) {
+    return
+  }
+
+  emit('dataChange', {
+    documents: {
+      idDocument: formData.value.idDocument,
+      proofOfAddress: formData.value.proofOfAddress,
+      bankStatement: formData.value.bankStatement
+    }
+  })
+}
+
+// Emit whenever the form data changes
+watch(formData, emitDocuments, { deep: true, immediate: false })
 
 // Expose form data to parent
 defineExpose({
   validate: () => true,
   getData: () => formData.value,
   submit: () => {
-    emit('dataChange', { documents: { ...formData.value } })
+    emitDocuments()
     return true
   }
 })

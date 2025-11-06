@@ -1,9 +1,9 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center gap-3 mb-6">
-      <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-        <Icon name="lucide:gauge" class="w-5 h-5 text-blue-600" />
-      </div>
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+          <Gauge class="w-5 h-5 text-blue-600" />
+        </div>
       <div>
         <h2 class="text-2xl font-bold text-gray-900">Meter & Unit Details</h2>
         <p class="text-sm text-gray-600 mt-1">Add your utility meters and tenant information</p>
@@ -38,7 +38,6 @@
                   type="text"
                   placeholder="Enter meter number"
                   :class="{ 'border-red-500': errors[`meters.${index}.meterNumber`] }"
-                  @input="handleDataChange"
                 />
                 <span v-if="errors[`meters.${index}.meterNumber`]" class="text-xs text-red-500 flex items-center gap-1">
                   <AlertCircle class="h-4 w-4" />
@@ -49,19 +48,12 @@
               <div class="space-y-2">
                 <Label :for="'utilityType-' + index">Utility Type</Label>
                 <Select
+                  :id="'utilityType-' + index"
                   v-model="meter.utilityType"
+                  :options="utilityTypeOptions"
+                  placeholder="Select utility type"
                   :class="{ 'border-red-500': errors[`meters.${index}.utilityType`] }"
-                  @update:model-value="handleDataChange"
-                >
-                  <SelectTrigger :id="'utilityType-' + index">
-                    <SelectValue placeholder="Select utility type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="electricity">Electricity</SelectItem>
-                    <SelectItem value="water">Water</SelectItem>
-                    <SelectItem value="gas">Gas</SelectItem>
-                  </SelectContent>
-                </Select>
+                />
                 <span v-if="errors[`meters.${index}.utilityType`]" class="text-xs text-red-500 flex items-center gap-1">
                   <AlertCircle class="h-4 w-4" />
                   {{ errors[`meters.${index}.utilityType`] }}
@@ -77,7 +69,6 @@
                 type="text"
                 placeholder="e.g., Main Building Basement, Unit 101"
                 :class="{ 'border-red-500': errors[`meters.${index}.location`] }"
-                @input="handleDataChange"
               />
               <span v-if="errors[`meters.${index}.location`]" class="text-xs text-red-500 flex items-center gap-1">
                 <AlertCircle class="h-4 w-4" />
@@ -89,7 +80,6 @@
               <Checkbox
                 :id="'isActive-' + index"
                 v-model="meter.isActive"
-                @update:checked="handleDataChange"
               />
               <Label :for="'isActive-' + index">Meter is currently active</Label>
             </div>
@@ -107,7 +97,6 @@
                   type="text"
                   placeholder="e.g., Unit 101"
                   :class="{ 'border-red-500': errors[`meters.${index}.unit.unitNumber`] }"
-                  @input="handleDataChange"
                 />
                 <span v-if="errors[`meters.${index}.unit.unitNumber`]" class="text-xs text-red-500 flex items-center gap-1">
                   <AlertCircle class="h-4 w-4" />
@@ -118,19 +107,12 @@
               <div class="space-y-2">
                 <Label :for="'unitType-' + index">Unit Type</Label>
                 <Select
+                  :id="'unitType-' + index"
                   v-model="meter.unit.unitType"
+                  :options="unitTypeOptions"
+                  placeholder="Select unit type"
                   :class="{ 'border-red-500': errors[`meters.${index}.unit.unitType`] }"
-                  @update:model-value="handleDataChange"
-                >
-                  <SelectTrigger :id="'unitType-' + index">
-                    <SelectValue placeholder="Select unit type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="residential">Residential</SelectItem>
-                    <SelectItem value="commercial">Commercial</SelectItem>
-                    <SelectItem value="industrial">Industrial</SelectItem>
-                  </SelectContent>
-                </Select>
+                />
                 <span v-if="errors[`meters.${index}.unit.unitType`]" class="text-xs text-red-500 flex items-center gap-1">
                   <AlertCircle class="h-4 w-4" />
                   {{ errors[`meters.${index}.unit.unitType`] }}
@@ -147,7 +129,6 @@
                 <Checkbox
                   :id="'hasTenant-' + index"
                   v-model="meter.unit.hasTenant"
-                  @update:checked="handleDataChange"
                 />
                 <Label :for="'hasTenant-' + index">Unit has current tenant</Label>
               </div>
@@ -163,7 +144,6 @@
                     type="text"
                     placeholder="Enter tenant's full name"
                     :class="{ 'border-red-500': errors[`meters.${index}.unit.tenant.name`] }"
-                    @input="handleDataChange"
                   />
                   <span v-if="errors[`meters.${index}.unit.tenant.name`]" class="text-xs text-red-500 flex items-center gap-1">
                     <AlertCircle class="h-4 w-4" />
@@ -179,7 +159,6 @@
                     type="tel"
                     placeholder="Enter tenant's phone number"
                     :class="{ 'border-red-500': errors[`meters.${index}.unit.tenant.phone`] }"
-                    @input="handleDataChange"
                   />
                   <span v-if="errors[`meters.${index}.unit.tenant.phone`]" class="text-xs text-red-500 flex items-center gap-1">
                     <AlertCircle class="h-4 w-4" />
@@ -196,7 +175,6 @@
                   type="email"
                   placeholder="Enter tenant's email address"
                   :class="{ 'border-red-500': errors[`meters.${index}.unit.tenant.email`] }"
-                  @input="handleDataChange"
                 />
                 <span v-if="errors[`meters.${index}.unit.tenant.email`]" class="text-xs text-red-500 flex items-center gap-1">
                   <AlertCircle class="h-4 w-4" />
@@ -212,7 +190,6 @@
                     v-model="meter.unit.tenant.leaseStart"
                     type="date"
                     :class="{ 'border-red-500': errors[`meters.${index}.unit.tenant.leaseStart`] }"
-                    @input="handleDataChange"
                   />
                   <span v-if="errors[`meters.${index}.unit.tenant.leaseStart`]" class="text-xs text-red-500 flex items-center gap-1">
                     <AlertCircle class="h-4 w-4" />
@@ -227,7 +204,6 @@
                     v-model="meter.unit.tenant.leaseEnd"
                     type="date"
                     :class="{ 'border-red-500': errors[`meters.${index}.unit.tenant.leaseEnd`] }"
-                    @input="handleDataChange"
                   />
                   <span v-if="errors[`meters.${index}.unit.tenant.leaseEnd`]" class="text-xs text-red-500 flex items-center gap-1">
                     <AlertCircle class="h-4 w-4" />
@@ -255,17 +231,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
-import { XIcon, PlusIcon, AlertCircle } from 'lucide-vue-next'
+import { ref, watch, computed } from 'vue'
+import { XIcon, PlusIcon, AlertCircle, Gauge } from 'lucide-vue-next'
 import Label from '~/components/ui/label.vue'
 import Input from '~/components/ui/input.vue'
 import Button from '~/components/ui/button.vue'
 import Checkbox from '~/components/ui/checkbox.vue'
 import Select from '~/components/ui/select.vue'
-import SelectContent from '~/components/ui/SelectContent.vue'
-import SelectItem from '~/components/ui/SelectItem.vue'
-import SelectTrigger from '~/components/ui/SelectTrigger.vue'
-import SelectValue from '~/components/ui/SelectValue.vue'
 
 const emit = defineEmits(['dataChange'])
 
@@ -276,59 +248,122 @@ const props = defineProps({
   }
 })
 
-const meters = ref([])
-const errors = reactive({})
+const utilityTypeOptions = [
+  { value: 'electricity', label: 'Electricity' },
+  { value: 'water', label: 'Water' },
+  { value: 'gas', label: 'Gas' }
+]
 
-// Initialize form data from props if available
-watch(() => props.registrationData?.meters, (newValue) => {
-  if (newValue && newValue.length > 0) {
-    meters.value = [...newValue]
+const unitTypeOptions = [
+  { value: 'residential', label: 'Residential' },
+  { value: 'commercial', label: 'Commercial' },
+  { value: 'industrial', label: 'Industrial' }
+]
+
+const createEmptyMeter = () => ({
+  meterNumber: '',
+  utilityType: '',
+  location: '',
+  isActive: true,
+  unit: {
+    unitNumber: '',
+    unitType: '',
+    hasTenant: false,
+    tenant: {
+      name: '',
+      phone: '',
+      email: '',
+      leaseStart: '',
+      leaseEnd: ''
+    }
   }
-}, { immediate: true })
+})
+
+const meters = ref([])
+const isSyncingFromProps = ref(false)
+
+watch(() => props.registrationData?.meters, (newValue) => {
+  if (!newValue) {
+    meters.value = []
+    return
+  }
+
+  isSyncingFromProps.value = true
+  meters.value = JSON.parse(JSON.stringify(newValue))
+  isSyncingFromProps.value = false
+}, { immediate: true, deep: true })
 
 const addMeter = () => {
-  meters.value.push({
-    meterNumber: '',
-    utilityType: '',
-    location: '',
-    isActive: true,
-    unit: {
-      unitNumber: '',
-      unitType: '',
-      hasTenant: false,
-      tenant: {
-        name: '',
-        phone: '',
-        email: '',
-        leaseStart: '',
-        leaseEnd: ''
-      }
-    }
-  })
-  handleDataChange()
+  meters.value.push(createEmptyMeter())
 }
 
 const removeMeter = (index) => {
   meters.value.splice(index, 1)
-  handleDataChange()
 }
 
-const handleDataChange = () => {
-  // Emit the data to parent
-  emit('dataChange', [...meters.value])
-}
+const errors = computed(() => {
+  const errorMap = {}
 
-const validateForm = () => true
+  meters.value.forEach((meter, index) => {
+    if (!meter.meterNumber || meter.meterNumber.trim().length === 0) {
+      errorMap[`meters.${index}.meterNumber`] = 'Meter number is required'
+    }
+
+    if (!meter.utilityType || meter.utilityType === '') {
+      errorMap[`meters.${index}.utilityType`] = 'Utility type is required'
+    }
+
+    if (!meter.unit?.unitType || meter.unit.unitType === '') {
+      errorMap[`meters.${index}.unit.unitType`] = 'Unit type is required'
+    }
+
+    if (meter.unit?.hasTenant) {
+      const tenant = meter.unit.tenant ?? {}
+
+      if (!tenant.name || tenant.name.trim().length === 0) {
+        errorMap[`meters.${index}.unit.tenant.name`] = 'Tenant name is required'
+      }
+      if (!tenant.phone || tenant.phone.trim().length === 0) {
+        errorMap[`meters.${index}.unit.tenant.phone`] = 'Tenant phone is required'
+      }
+      if (!tenant.email || tenant.email.trim().length === 0) {
+        errorMap[`meters.${index}.unit.tenant.email`] = 'Tenant email is required'
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tenant.email)) {
+        errorMap[`meters.${index}.unit.tenant.email`] = 'Please enter a valid email address'
+      }
+      if (!tenant.leaseStart || tenant.leaseStart.trim().length === 0) {
+        errorMap[`meters.${index}.unit.tenant.leaseStart`] = 'Lease start date is required'
+      }
+      if (!tenant.leaseEnd || tenant.leaseEnd.trim().length === 0) {
+        errorMap[`meters.${index}.unit.tenant.leaseEnd`] = 'Lease end date is required'
+      }
+    }
+  })
+
+  return errorMap
+})
+
+watch(meters, (newValue) => {
+  if (isSyncingFromProps.value) {
+    return
+  }
+
+  emit('dataChange', JSON.parse(JSON.stringify(newValue)))
+}, { deep: true, immediate: false })
 
 const handleSubmit = () => {
-  handleDataChange()
+  if (isSyncingFromProps.value) {
+    return
+  }
+
+  emit('dataChange', JSON.parse(JSON.stringify(meters.value)))
 }
 
 defineExpose({
   validate: () => true,
-  getData: () => [...meters.value],
+  getData: () => JSON.parse(JSON.stringify(meters.value)),
   submit: () => {
-    handleDataChange()
+    handleSubmit()
     return true
   }
 })

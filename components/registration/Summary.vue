@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="flex items-center gap-3 mb-6">
       <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-        <Icon name="lucide:file-check-2" class="w-5 h-5 text-blue-600" />
+        <FileCheck2 class="w-5 h-5 text-blue-600" />
       </div>
       <div>
         <h2 class="text-2xl font-bold text-gray-900">Registration Summary</h2>
@@ -339,7 +339,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { PencilIcon, FileIcon, PrinterIcon, Loader2Icon } from 'lucide-vue-next'
+import { PencilIcon, FileIcon, PrinterIcon, Loader2Icon, FileCheck2 } from 'lucide-vue-next'
 import Button from '~/components/ui/button.vue'
 
 const props = defineProps({
@@ -356,7 +356,7 @@ const props = defineProps({
 // Debug logging
 console.log('Summary component received data:', props.registrationData)
 
-defineEmits(['edit'])
+const emit = defineEmits(['edit', 'submit'])
 
 const isGeneratingPDF = ref(false)
 const isSubmitting = ref(false)
@@ -445,6 +445,26 @@ const submitRegistration = async () => {
   isSubmitting.value = true
   
   try {
+    // First, save to database
+    const payload = {
+      type: props.registrationData.type,
+      personal: props.registrationData.personal,
+      banking: props.registrationData.banking,
+      address: props.registrationData.address,
+      meters: props.registrationData.meters || [],
+      documents: props.registrationData.documents || {}
+    }
+
+    console.log('Saving registration to database...', payload)
+    
+    const dbResponse = await $fetch('/api/registration', {
+      method: 'POST',
+      body: payload
+    })
+
+    console.log('Registration saved to database:', dbResponse)
+
+    // Then generate PDF and send email
     // Import html2pdf dynamically
     const html2pdf = (await import('html2pdf.js')).default
     
@@ -471,14 +491,15 @@ const submitRegistration = async () => {
     formData.append('pdf', pdfBlob, `registration-summary-${new Date().toISOString().split('T')[0]}.pdf`)
     
     // Send email with PDF attachment
-    const response = await fetch('/api/send-email', {
+    const emailResponse = await fetch('/api/send-email', {
       method: 'POST',
       body: formData
     })
     
-    if (response.ok) {
+    if (emailResponse.ok) {
       alert('Registration submitted successfully! You will receive a confirmation email shortly.')
-      // Optionally redirect or reset form
+      // Emit event to parent to handle navigation/reset
+      emit('submit', dbResponse)
     } else {
       throw new Error('Failed to send email')
     }
@@ -486,6 +507,7 @@ const submitRegistration = async () => {
   } catch (error) {
     console.error('Error submitting registration:', error)
     alert('Failed to submit registration. Please try again.')
+    throw error
   } finally {
     isSubmitting.value = false
   }

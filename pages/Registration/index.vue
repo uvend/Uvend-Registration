@@ -85,7 +85,7 @@
             <h2 class="text-2xl font-bold text-gray-900 mb-2">Registration Not Available</h2>
             <p class="text-gray-600 mb-6">Registration is currently not enabled in this environment.</p>
             <NuxtLink to="/" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 font-medium">
-                <Icon name="lucide:arrow-left" class="w-4 h-4" />
+                <ArrowLeft class="w-4 h-4" />
                 Return to Home
             </NuxtLink>
         </div>
@@ -94,7 +94,7 @@
 
 <script setup>
 import { ref, computed, markRaw, getCurrentInstance, watch, onMounted, onBeforeUnmount } from 'vue'
-import { Lock } from 'lucide-vue-next'
+import { Lock, ArrowLeft } from 'lucide-vue-next'
 import RegistrationType from '~/components/registration/RegistrationType.vue'
 import PersonalInfo from '~/components/registration/PersonalInfo.vue'
 import DocumentUpload from '~/components/registration/DocumentUpload.vue'
@@ -204,8 +204,21 @@ const handleStepComplete = async () => {
 
 const handleSubmit = async () => {
     try {
-        // Here you would typically send the data to your backend
-        console.log('Registration submitted:', formData.value)
+        const payload = {
+            type: formData.value.type,
+            personal: formData.value.personal,
+            banking: formData.value.banking,
+            address: formData.value.address,
+            meters: formData.value.meters,
+            documents: formData.value.documents
+        }
+
+        const res = await $fetch('/api/registration', {
+            method: 'POST',
+            body: payload
+        })
+
+        console.log('Registration saved:', res)
 
         useToast({
             title: 'Success',
@@ -220,6 +233,14 @@ const handleSubmit = async () => {
     }
 }
 
+const isObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value)
+const toPlain = (value) => JSON.stringify(value ?? null)
+const hasChanged = (current, next) => toPlain(current) !== toPlain(next)
+
+const personalKeys = ['firstName', 'lastName', 'email', 'phone', 'idNumber', 'dateOfBirth']
+const bankingKeys = ['accountHolder', 'bankName', 'accountNumber', 'accountType', 'branchCode']
+const addressKeys = ['streetAddress', 'suburb', 'city', 'province', 'postalCode', 'complexes']
+
 const handleDataChange = (data) => {
     // Store the data based on current step
     const stepId = effectiveSteps.value[currentStep.value - 1].id
@@ -229,27 +250,49 @@ const handleDataChange = (data) => {
     // Handle the new step structure
     switch (stepId) {
         case 'type':
-            registrationStore.setType(data)
+            if (isObject(data)) {
+                if (typeof data.type === 'string' && registrationStore.formData.type !== data.type) {
+                    registrationStore.setType(data.type)
+                }
+            } else if (typeof data === 'string' && registrationStore.formData.type !== data) {
+                registrationStore.setType(data)
+            }
             break
         case 'personal-banking':
             // Determine which component emitted based on data structure or component type
             // PersonalInfo and BankingDetails will emit their respective data
-            if (data.firstName || data.lastName || data.email || data.phone || data.idNumber || data.dateOfBirth) {
-                registrationStore.setPersonal(data)
-            } else if (data.accountHolder || data.bankName || data.accountType || data.branchCode || data.accountNumber) {
-                registrationStore.setBanking(data)
+          if (isObject(data) && personalKeys.some(key => key in data)) {
+                if (hasChanged(registrationStore.formData.personal, data)) {
+                    registrationStore.setPersonal(data)
+                }
+            } else if (isObject(data) && bankingKeys.some(key => key in data)) {
+                if (hasChanged(registrationStore.formData.banking, data)) {
+                    registrationStore.setBanking(data)
+                }
             }
             break
         case 'address-meters':
             // Determine which component emitted
-            if (data.streetAddress || data.suburb || data.city || data.province || data.postalCode || data.complexes) {
-                registrationStore.setAddress(data)
-            } else if (data.meters || Array.isArray(data)) {
-                registrationStore.setMeters(data)
+          if (isObject(data) && addressKeys.some(key => key in data)) {
+                if (hasChanged(registrationStore.formData.address, data)) {
+                    registrationStore.setAddress(data)
+                }
+            } else if (Array.isArray(data)) {
+                if (hasChanged(registrationStore.formData.meters, data)) {
+                    registrationStore.setMeters(data)
+                }
             }
             break
         case 'documents':
-            registrationStore.setDocuments(data)
+            if (isObject(data) && isObject(data.documents)) {
+                if (hasChanged(registrationStore.formData.documents, data.documents)) {
+                    registrationStore.setDocuments(data.documents)
+                }
+            } else if (isObject(data)) {
+                if (hasChanged(registrationStore.formData.documents, data)) {
+                    registrationStore.setDocuments(data)
+                }
+            }
             break
         case 'summary':
             // Summary doesn't emit data changes

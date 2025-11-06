@@ -3,7 +3,7 @@
     <div class="space-y-6">
       <div class="flex items-center gap-3 mb-6">
         <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-          <Icon name="lucide:user" class="w-5 h-5 text-blue-600" />
+          <User class="w-5 h-5 text-blue-600" />
         </div>
         <div>
           <h2 class="text-2xl font-bold text-gray-900">Personal Information</h2>
@@ -15,14 +15,13 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-3">
             <Label for="firstName" class="text-gray-700 font-medium">First Name</Label>
-            <Input
+          <Input
               id="firstName"
               v-model="formData.firstName"
               type="text"
               placeholder="Enter your first name"
               class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
-              :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.firstName }"
-              @input="emitDataChange"
+            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.firstName }"
             />
           <span v-if="errors.firstName" class="text-sm text-red-500 flex items-center gap-1">
             <AlertCircle class="h-4 w-4" />
@@ -39,7 +38,6 @@
             placeholder="Enter your last name"
             class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
             :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.lastName }"
-            @input="emitDataChange"
           />
           <span v-if="errors.lastName" class="text-sm text-red-500 flex items-center gap-1">
             <AlertCircle class="h-4 w-4" />
@@ -56,7 +54,6 @@
             placeholder="Enter your email"
             class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
             :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.email }"
-            @input="emitDataChange"
           />
           <span v-if="errors.email" class="text-sm text-red-500 flex items-center gap-1">
             <AlertCircle class="h-4 w-4" />
@@ -73,7 +70,6 @@
             placeholder="Enter your phone number"
             class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
             :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.phone }"
-            @input="emitDataChange"
           />
           <span v-if="errors.phone" class="text-sm text-red-500 flex items-center gap-1">
             <AlertCircle class="h-4 w-4" />
@@ -90,7 +86,6 @@
             placeholder="Enter your ID number"
             class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
             :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.idNumber }"
-            @input="emitDataChange"
           />
           <span v-if="errors.idNumber" class="text-sm text-red-500 flex items-center gap-1">
             <AlertCircle class="h-4 w-4" />
@@ -106,7 +101,6 @@
             type="date"
             class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
             :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.dateOfBirth }"
-            @input="emitDataChange"
           />
           <span v-if="errors.dateOfBirth" class="text-sm text-red-500 flex items-center gap-1">
             <AlertCircle class="h-4 w-4" />
@@ -120,10 +114,10 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import Label from '~/components/ui/label.vue'
 import Input from '~/components/ui/input.vue'
-import { AlertCircle } from 'lucide-vue-next'
+import { AlertCircle, User } from 'lucide-vue-next'
 
 const props = defineProps({
   registrationData: {
@@ -134,7 +128,7 @@ const props = defineProps({
 
 const emit = defineEmits(['dataChange'])
 
-const formData = ref({
+const defaultPersonalState = () => ({
   firstName: '',
   lastName: '',
   email: '',
@@ -143,53 +137,66 @@ const formData = ref({
   dateOfBirth: ''
 })
 
-const errors = ref({})
+const formData = ref(defaultPersonalState())
+const isSyncingFromProps = ref(false)
 
-// Initialize form data from props if available
+// Initialize / sync form data from props if available
 watch(() => props.registrationData?.personal, (newValue) => {
-  if (newValue) {
-    formData.value = { ...newValue }
+  if (!newValue) {
+    return
   }
-}, { immediate: true })
 
-// Validate form data before submitting
-watch(formData, (newValue) => {
+  isSyncingFromProps.value = true
+  formData.value = {
+    ...defaultPersonalState(),
+    ...JSON.parse(JSON.stringify(newValue))
+  }
+  isSyncingFromProps.value = false
+}, { immediate: true, deep: true })
+
+const errors = computed(() => {
+  const current = formData.value
   const newErrors = {}
-  
-  if (!newValue.firstName) {
+
+  if (!current.firstName || current.firstName.trim().length === 0) {
     newErrors.firstName = 'First name is required'
   }
-  if (!newValue.lastName) {
+  if (!current.lastName || current.lastName.trim().length === 0) {
     newErrors.lastName = 'Last name is required'
   }
-  if (!newValue.email) {
+  if (!current.email || current.email.trim().length === 0) {
     newErrors.email = 'Email is required'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newValue.email)) {
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(current.email)) {
     newErrors.email = 'Please enter a valid email address'
   }
-  if (!newValue.phone) {
+  if (!current.phone || current.phone.trim().length === 0) {
     newErrors.phone = 'Phone number is required'
   }
-  if (!newValue.idNumber) {
+  if (!current.idNumber || current.idNumber.trim().length === 0) {
     newErrors.idNumber = 'ID number is required'
   }
-  if (!newValue.dateOfBirth) {
+  if (!current.dateOfBirth || current.dateOfBirth.trim().length === 0) {
     newErrors.dateOfBirth = 'Date of birth is required'
   }
 
-  errors.value = newErrors
-}, { deep: true })
+  return newErrors
+})
 
-const emitDataChange = () => {
-  emit('dataChange', { ...formData.value })
-}
+// Emit whenever the form changes (skip when syncing from props)
+watch(formData, (newValue) => {
+  if (isSyncingFromProps.value) {
+    return
+  }
+
+  emit('dataChange', JSON.parse(JSON.stringify(newValue)))
+}, { deep: true, immediate: false })
 
 // Expose form data to parent
 defineExpose({
   validate: () => true,
   getData: () => formData.value,
   submit: () => {
-    emit('dataChange', { ...formData.value })
+    emit('dataChange', JSON.parse(JSON.stringify(formData.value)))
     return true
   }
 })

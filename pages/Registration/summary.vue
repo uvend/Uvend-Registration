@@ -33,8 +33,9 @@ const handlePrev = () => {
 
 const handleSubmit = async (data) => {
   try {
-    // Here you would typically send the data to your backend
-    await new Promise(resolve => setTimeout(resolve, 2000)) // Simulated API call
+    // The Summary component already saved to database and sent email
+    // Just handle navigation and reset here
+    console.log('Registration completed:', data)
 
     // Show success message
     useToast({

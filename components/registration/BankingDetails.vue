@@ -3,7 +3,7 @@
     <div class="space-y-6">
       <div class="flex items-center gap-3 mb-6">
         <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-          <Icon name="lucide:credit-card" class="w-5 h-5 text-blue-600" />
+          <CreditCard class="w-5 h-5 text-blue-600" />
         </div>
         <div>
           <h2 class="text-2xl font-bold text-gray-900">Banking Details</h2>
@@ -31,7 +31,6 @@
               'border-green-500 focus:ring-green-500': formData.accountHolder && !errors.accountHolder
             }"
             aria-describedby="accountHolder-error"
-            @input="handleDataChange"
           />
           <p id="accountHolder-hint" class="text-xs text-gray-500">Enter the name exactly as it appears on your bank account</p>
           <span 
@@ -56,7 +55,6 @@
               'border-red-500 focus:ring-red-500': errors.bankName,
               'border-green-500 focus:ring-green-500': formData.bankName && !errors.bankName
             }"
-            @input="handleDataChange"
           />
           <span 
             v-if="errors.bankName" 
@@ -101,22 +99,19 @@
         <div class="space-y-3">
           <Label for="accountType" class="text-gray-700 font-medium">Account Type</Label>
           <Select
+            id="accountType"
             v-model="formData.accountType"
-            :class="{ 
-              'border-red-500 focus:ring-red-500': errors.accountType,
-              'border-green-500 focus:ring-green-500': formData.accountType && !errors.accountType
-            }"
-            @update:model-value="handleDataChange"
-          >
-            <SelectTrigger id="accountType" aria-describedby="accountType-error" class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200">
-              <SelectValue placeholder="Select account type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="savings">Savings</SelectItem>
-              <SelectItem value="current">Current/Cheque</SelectItem>
-              <SelectItem value="transmission">Transmission</SelectItem>
-            </SelectContent>
-          </Select>
+            :options="accountTypeOptions"
+            placeholder="Select account type"
+            :class="cn(
+              'bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200',
+              { 
+                'border-red-500 focus:ring-red-500': errors.accountType,
+                'border-green-500 focus:ring-green-500': formData.accountType && formData.accountType !== '' && !errors.accountType
+              }
+            )"
+            aria-describedby="accountType-error"
+          />
           <span 
             v-if="errors.accountType" 
             id="accountType-error" 
@@ -165,17 +160,12 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import Label from '~/components/ui/label.vue'
 import Input from '~/components/ui/input.vue'
-import { AlertCircle } from 'lucide-vue-next'
+import { AlertCircle, CreditCard } from 'lucide-vue-next'
 import Select from '~/components/ui/select.vue'
-import SelectContent from '~/components/ui/SelectContent.vue'
-import SelectGroup from '~/components/ui/SelectGroup.vue'
-import SelectItem from '~/components/ui/SelectItem.vue'
-import SelectLabel from '~/components/ui/SelectLabel.vue'
-import SelectTrigger from '~/components/ui/SelectTrigger.vue'
-import SelectValue from '~/components/ui/SelectValue.vue'
+import { cn } from '~/utils/cn'
 
 const props = defineProps({
   registrationData: {
@@ -186,7 +176,7 @@ const props = defineProps({
 
 const emit = defineEmits(['dataChange'])
 
-const formData = ref({
+const defaultBankingState = () => ({
   accountHolder: '',
   bankName: '',
   accountNumber: '',
@@ -194,64 +184,95 @@ const formData = ref({
   branchCode: ''
 })
 
-const errors = ref({})
+const formData = ref(defaultBankingState())
+const isSyncingFromProps = ref(false)
+
+const accountTypeOptions = [
+  { value: 'savings', label: 'Savings' },
+  { value: 'current', label: 'Current/Cheque' },
+  { value: 'transmission', label: 'Transmission' }
+]
 
 // Initialize form data from props if available
 watch(() => props.registrationData?.banking, (newValue) => {
-  if (newValue) {
-    formData.value = { ...newValue }
+  if (!newValue) {
+    return
   }
-}, { immediate: true })
+
+  isSyncingFromProps.value = true
+
+  const synced = {
+    ...defaultBankingState(),
+    ...JSON.parse(JSON.stringify(newValue))
+  }
+
+  if (!synced.accountType) {
+    synced.accountType = ''
+  }
+
+  formData.value = synced
+  isSyncingFromProps.value = false
+}, { immediate: true, deep: true })
 
 // Format account number to only allow numbers
 const formatAccountNumber = (event) => {
   formData.value.accountNumber = event.target.value.replace(/\D/g, '').slice(0, 16)
-  handleDataChange()
 }
 
 // Format branch code to only allow numbers
 const formatBranchCode = (event) => {
   formData.value.branchCode = event.target.value.replace(/\D/g, '').slice(0, 6)
-  handleDataChange()
 }
 
-// Validate form data before submitting
-watch(formData, (newValue) => {
+const errors = computed(() => {
+  const current = formData.value
   const newErrors = {}
   
-  if (!newValue.accountHolder) {
+  // Account holder - 1+ character (no strict limit)
+  if (!current.accountHolder || current.accountHolder.trim().length === 0) {
     newErrors.accountHolder = 'Account holder name is required'
-  } else if (newValue.accountHolder.length < 3) {
-    newErrors.accountHolder = 'Please enter a valid account holder name'
   }
 
-  if (!newValue.bankName) {
+  // Bank name - 1+ character
+  if (!current.bankName || current.bankName.trim().length === 0) {
     newErrors.bankName = 'Bank name is required'
   }
 
-  if (!newValue.accountNumber) {
+  // Account number - explicit limit: 5-16 digits
+  if (!current.accountNumber || current.accountNumber.trim().length === 0) {
     newErrors.accountNumber = 'Account number is required'
-  } else if (!/^\d{5,16}$/.test(newValue.accountNumber)) {
+  } else if (!/^\d{5,16}$/.test(current.accountNumber)) {
     newErrors.accountNumber = 'Please enter a valid account number (5-16 digits)'
   }
 
-  if (!newValue.accountType) {
+  // Account type - dropdown, must be selected (not empty string)
+  if (!current.accountType || current.accountType === '') {
     newErrors.accountType = 'Account type is required'
   }
 
-  if (!newValue.branchCode) {
+  // Branch code - explicit limit: exactly 6 digits
+  if (!current.branchCode || current.branchCode.trim().length === 0) {
     newErrors.branchCode = 'Branch code is required'
-  } else if (!/^\d{6}$/.test(newValue.branchCode)) {
+  } else if (!/^\d{6}$/.test(current.branchCode)) {
     newErrors.branchCode = 'Please enter a valid 6-digit branch code'
   }
 
-  errors.value = newErrors
-}, { deep: true })
+  return newErrors
+})
 
-const handleDataChange = () => {
-  // Emit the data to parent
-  emit('dataChange', { ...formData.value })
-}
+// Emit whenever the form changes (skip when syncing from props)
+watch(formData, (newValue) => {
+  if (isSyncingFromProps.value) {
+    return
+  }
+
+  const payload = {
+    ...JSON.parse(JSON.stringify(newValue)),
+    accountType: newValue.accountType ?? ''
+  }
+
+  emit('dataChange', payload)
+}, { deep: true, immediate: false })
 
 // Expose form data to parent
 defineExpose({

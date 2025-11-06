@@ -3,41 +3,42 @@ import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, readMultipartFormData, getResponseStatusText } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/h3/dist/index.mjs';
-import { escapeHtml } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/@vue/shared/dist/shared.cjs.js';
-import nodemailer from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/nodemailer/lib/nodemailer.js';
-import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/vue-bundle-renderer/dist/runtime.mjs';
-import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/ufo/dist/index.mjs';
-import { renderToString } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/vue/server-renderer/index.mjs';
-import { klona } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/klona/dist/index.mjs';
-import defu, { defuFn } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/defu/dist/defu.mjs';
-import destr, { destr as destr$1 } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/destr/dist/index.mjs';
-import { snakeCase } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/scule/dist/index.mjs';
-import { createHead as createHead$1, propsToString, renderSSRHead } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/unhead/dist/server.mjs';
-import { stringify, uneval } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/devalue/index.js';
-import { isVNode, toValue, isRef } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/vue/index.mjs';
-import { DeprecationsPlugin, PromisesPlugin, TemplateParamsPlugin, AliasSortingPlugin } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/unhead/dist/plugins.mjs';
-import { createHooks } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/hookable/dist/index.mjs';
-import { createFetch, Headers as Headers$1 } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/ofetch/dist/node.mjs';
-import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/node-mock-http/dist/index.mjs';
-import { createStorage, prefixStorage } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/unstorage/dist/index.mjs';
-import unstorage_47drivers_47fs from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/unstorage/drivers/fs.mjs';
-import { digest } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/ohash/dist/index.mjs';
-import { toRouteMatcher, createRouter } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/radix3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, readMultipartFormData, getResponseStatusText } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/h3/dist/index.mjs';
+import { escapeHtml } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/@vue/shared/dist/shared.cjs.js';
+import { PrismaClient } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/@prisma/client/default.js';
+import nodemailer from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/nodemailer/lib/nodemailer.js';
+import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/vue-bundle-renderer/dist/runtime.mjs';
+import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/ufo/dist/index.mjs';
+import { renderToString } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/vue/server-renderer/index.mjs';
+import { klona } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/klona/dist/index.mjs';
+import defu, { defuFn } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/defu/dist/defu.mjs';
+import destr, { destr as destr$1 } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/destr/dist/index.mjs';
+import { snakeCase } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/scule/dist/index.mjs';
+import { createHead as createHead$1, propsToString, renderSSRHead } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/unhead/dist/server.mjs';
+import { stringify, uneval } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/devalue/index.js';
+import { isVNode, toValue, isRef } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/vue/index.mjs';
+import { DeprecationsPlugin, PromisesPlugin, TemplateParamsPlugin, AliasSortingPlugin } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/unhead/dist/plugins.mjs';
+import { createHooks } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/hookable/dist/index.mjs';
+import { createFetch, Headers as Headers$1 } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/ofetch/dist/node.mjs';
+import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/node-mock-http/dist/index.mjs';
+import { createStorage, prefixStorage } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/unstorage/dist/index.mjs';
+import unstorage_47drivers_47fs from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/unstorage/drivers/fs.mjs';
+import { digest } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/ohash/dist/index.mjs';
+import { toRouteMatcher, createRouter } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/radix3/dist/index.mjs';
 import { readFile } from 'node:fs/promises';
-import consola, { consola as consola$1 } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/consola/dist/index.mjs';
-import { ErrorParser } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/youch-core/build/index.js';
-import { Youch } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/nitropack/node_modules/youch/build/index.js';
-import { SourceMapConsumer } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/source-map/source-map.js';
+import consola, { consola as consola$1 } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/consola/dist/index.mjs';
+import { ErrorParser } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/youch-core/build/index.js';
+import { Youch } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/nitropack/node_modules/youch/build/index.js';
+import { SourceMapConsumer } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/source-map/source-map.js';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { getContext } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/unctx/dist/index.mjs';
-import { captureRawStackTrace, parseRawStackTrace } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/errx/dist/index.js';
+import { getContext } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/unctx/dist/index.mjs';
+import { captureRawStackTrace, parseRawStackTrace } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/errx/dist/index.js';
 import { promises } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname as dirname$1, resolve as resolve$1 } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/pathe/dist/index.mjs';
-import { walkResolver } from 'file://C:/Users/Zaid/Desktop/Uvend-Registration/node_modules/unhead/dist/utils.mjs';
+import { dirname as dirname$1, resolve as resolve$1 } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/pathe/dist/index.mjs';
+import { walkResolver } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/unhead/dist/utils.mjs';
 
-const serverAssets = [{"baseName":"server","dir":"C:/Users/Zaid/Desktop/Uvend-Registration/server/assets"}];
+const serverAssets = [{"baseName":"server","dir":"C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/server/assets"}];
 
 const assets$1 = createStorage();
 
@@ -49,11 +50,11 @@ const storage = createStorage({});
 
 storage.mount('/assets', assets$1);
 
-storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Users/Zaid/Desktop/Uvend-Registration","watchOptions":{"ignored":[null]}}));
-storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Users/Zaid/Desktop/Uvend-Registration/server","watchOptions":{"ignored":[null]}}));
-storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Users/Zaid/Desktop/Uvend-Registration/.nuxt"}));
-storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Users/Zaid/Desktop/Uvend-Registration/.nuxt/cache"}));
-storage.mount('data', unstorage_47drivers_47fs({"driver":"fs","base":"C:/Users/Zaid/Desktop/Uvend-Registration/.data/kv"}));
+storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration","watchOptions":{"ignored":[null]}}));
+storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/server","watchOptions":{"ignored":[null]}}));
+storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/.nuxt"}));
+storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/.nuxt/cache"}));
+storage.mount('data', unstorage_47drivers_47fs({"driver":"fs","base":"C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/.data/kv"}));
 
 function useStorage(base = "") {
   return base ? prefixStorage(storage, base) : storage;
@@ -1015,13 +1016,13 @@ if (!window.__NUXT_DEVTOOLS_TIME_METRIC__) {
 window.__NUXT_DEVTOOLS_TIME_METRIC__.appInit = Date.now()
 `;
 
-const _Lzf_hFzqv5FHwxlcid_l_6eQLj1qi7WcaBIxJOAJrU = (function(nitro) {
+const _SyYkwrQpF9RiSuicZOYoYHmHLOkPhZ255pRNPryI5Vs = (function(nitro) {
   nitro.hooks.hook("render:html", (htmlContext) => {
     htmlContext.head.push(`<script>${script}<\/script>`);
   });
 });
 
-const rootDir = "C:/Users/Zaid/Desktop/Uvend-Registration";
+const rootDir = "C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration";
 
 const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[]};
 
@@ -1040,7 +1041,7 @@ const devReducers = {
   URL: (data) => data instanceof URL ? data.toString() : void 0
 };
 const asyncContext = getContext("nuxt-dev", { asyncContext: true, AsyncLocalStorage });
-const _hadlyecUwWK_ZM8m2wD1R8jiOpgQpatLF2JWvahGUw = (nitroApp) => {
+const _JPjRJU0zxiHMZuBd0zW5LqwZ6IrB_6C_TXP9pD8jU = (nitroApp) => {
   const handler = nitroApp.h3App.handler;
   nitroApp.h3App.handler = (event) => {
     return asyncContext.callAsync({ logs: [], event }, () => handler(event));
@@ -1110,8 +1111,8 @@ function onConsoleLog(callback) {
 }
 
 const plugins = [
-  _Lzf_hFzqv5FHwxlcid_l_6eQLj1qi7WcaBIxJOAJrU,
-_hadlyecUwWK_ZM8m2wD1R8jiOpgQpatLF2JWvahGUw
+  _SyYkwrQpF9RiSuicZOYoYHmHLOkPhZ255pRNPryI5Vs,
+_JPjRJU0zxiHMZuBd0zW5LqwZ6IrB_6C_TXP9pD8jU
 ];
 
 const assets = {};
@@ -1139,7 +1140,7 @@ function getAsset (id) {
 
 const METHODS = /* @__PURE__ */ new Set(["HEAD", "GET"]);
 const EncodingMap = { gzip: ".gz", br: ".br" };
-const _TWuzpD = eventHandler((event) => {
+const _u9TkO4 = eventHandler((event) => {
   if (event.method && !METHODS.has(event.method)) {
     return;
   }
@@ -1277,8 +1278,8 @@ function publicAssetsURL(...path) {
 
 const APP_ROOT_OPEN_TAG = `<${appRootTag}${propsToString(appRootAttrs)}>`;
 const APP_ROOT_CLOSE_TAG = `</${appRootTag}>`;
-const getServerEntry = () => import('file://C:/Users/Zaid/Desktop/Uvend-Registration/.nuxt/dist/server/server.mjs').then((r) => r.default || r);
-const getClientManifest = () => import('file://C:/Users/Zaid/Desktop/Uvend-Registration/.nuxt/dist/server/client.manifest.mjs').then((r) => r.default || r).then((r) => typeof r === "function" ? r() : r);
+const getServerEntry = () => import('file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/.nuxt/dist/server/server.mjs').then((r) => r.default || r);
+const getClientManifest = () => import('file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/.nuxt/dist/server/client.manifest.mjs').then((r) => r.default || r).then((r) => typeof r === "function" ? r() : r);
 const getSSRRenderer = lazyCachedFunction(async () => {
   const manifest = await getClientManifest();
   if (!manifest) {
@@ -1524,15 +1525,17 @@ async function getIslandContext(event) {
   return ctx;
 }
 
-const _lazy_0L_lEQ = () => Promise.resolve().then(function () { return sendEmail_post$1; });
-const _lazy_xDh_lq = () => Promise.resolve().then(function () { return renderer$1; });
+const _lazy_RwNlCk = () => Promise.resolve().then(function () { return registration_post$1; });
+const _lazy_8nuumq = () => Promise.resolve().then(function () { return sendEmail_post$1; });
+const _lazy_eLJJ1l = () => Promise.resolve().then(function () { return renderer$1; });
 
 const handlers = [
-  { route: '', handler: _TWuzpD, lazy: false, middleware: true, method: undefined },
-  { route: '/api/send-email', handler: _lazy_0L_lEQ, lazy: true, middleware: false, method: "post" },
-  { route: '/__nuxt_error', handler: _lazy_xDh_lq, lazy: true, middleware: false, method: undefined },
+  { route: '', handler: _u9TkO4, lazy: false, middleware: true, method: undefined },
+  { route: '/api/registration', handler: _lazy_RwNlCk, lazy: true, middleware: false, method: "post" },
+  { route: '/api/send-email', handler: _lazy_8nuumq, lazy: true, middleware: false, method: "post" },
+  { route: '/__nuxt_error', handler: _lazy_eLJJ1l, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: _SxA8c9, lazy: false, middleware: false, method: undefined },
-  { route: '/**', handler: _lazy_xDh_lq, lazy: true, middleware: false, method: undefined }
+  { route: '/**', handler: _lazy_eLJJ1l, lazy: true, middleware: false, method: undefined }
 ];
 
 function createNitroApp() {
@@ -1858,6 +1861,99 @@ const styles = {};
 const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: styles
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const prisma = new PrismaClient();
+const registration_post = defineEventHandler(async (event) => {
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
+  try {
+    const body = await readBody(event);
+    if (!body) {
+      throw createError({ statusCode: 400, statusMessage: "Missing request body" });
+    }
+    const {
+      type,
+      personal = {},
+      banking = {},
+      address = {},
+      meters = [],
+      documents = {}
+    } = body;
+    if (!type || !personal.firstName || !personal.lastName || !personal.email) {
+      throw createError({ statusCode: 400, statusMessage: "Missing required fields" });
+    }
+    const created = await prisma.registration.create({
+      data: {
+        type,
+        firstName: personal.firstName,
+        lastName: personal.lastName,
+        email: personal.email,
+        phone: (_a = personal.phone) != null ? _a : null,
+        idNumber: (_b = personal.idNumber) != null ? _b : null,
+        dateOfBirth: (_c = personal.dateOfBirth) != null ? _c : null,
+        bankName: (_d = banking.bankName) != null ? _d : null,
+        accountNumber: (_e = banking.accountNumber) != null ? _e : null,
+        accountHolder: (_f = banking.accountHolder) != null ? _f : null,
+        branchCode: (_g = banking.branchCode) != null ? _g : null,
+        accountType: (_h = banking.accountType) != null ? _h : null,
+        streetAddress: (_i = address.streetAddress) != null ? _i : null,
+        suburb: (_j = address.suburb) != null ? _j : null,
+        city: (_k = address.city) != null ? _k : null,
+        province: (_l = address.province) != null ? _l : null,
+        postalCode: (_m = address.postalCode) != null ? _m : null,
+        complexes: address.complexes && address.complexes.length ? {
+          create: address.complexes.map((c) => ({
+            name: c.name,
+            unitCount: Number(c.unitCount || 0),
+            address: c.address || ""
+          }))
+        } : void 0,
+        meters: Array.isArray(meters) && meters.length ? {
+          create: meters.map((m) => {
+            var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2, _j2, _k2, _l2, _m2;
+            return {
+              meterNumber: m.meterNumber,
+              utilityType: m.utilityType,
+              location: m.location || null,
+              isActive: typeof m.isActive === "boolean" ? m.isActive : true,
+              unitNumber: ((_a2 = m.unit) == null ? void 0 : _a2.unitNumber) || null,
+              unitType: ((_b2 = m.unit) == null ? void 0 : _b2.unitType) || null,
+              hasTenant: !!((_c2 = m.unit) == null ? void 0 : _c2.hasTenant),
+              tenantName: ((_e2 = (_d2 = m.unit) == null ? void 0 : _d2.tenant) == null ? void 0 : _e2.name) || null,
+              tenantPhone: ((_g2 = (_f2 = m.unit) == null ? void 0 : _f2.tenant) == null ? void 0 : _g2.phone) || null,
+              tenantEmail: ((_i2 = (_h2 = m.unit) == null ? void 0 : _h2.tenant) == null ? void 0 : _i2.email) || null,
+              leaseStart: ((_k2 = (_j2 = m.unit) == null ? void 0 : _j2.tenant) == null ? void 0 : _k2.leaseStart) || null,
+              leaseEnd: ((_m2 = (_l2 = m.unit) == null ? void 0 : _l2.tenant) == null ? void 0 : _m2.leaseEnd) || null
+            };
+          })
+        } : void 0,
+        documents: (() => {
+          const createdDocs = [];
+          if (documents.idDocument) {
+            createdDocs.push({ kind: "idDocument", fileName: null, mimeType: null, url: null });
+          }
+          if (documents.proofOfAddress) {
+            createdDocs.push({ kind: "proofOfAddress", fileName: null, mimeType: null, url: null });
+          }
+          if (Array.isArray(documents.additionalDocuments)) {
+            for (let i = 0; i < documents.additionalDocuments.length; i++) {
+              createdDocs.push({ kind: "additional", fileName: null, mimeType: null, url: null });
+            }
+          }
+          return createdDocs.length ? { create: createdDocs } : void 0;
+        })()
+      }
+    });
+    return { success: true, id: created.id };
+  } catch (error) {
+    console.error("Registration save failed:", error);
+    throw createError({ statusCode: 500, statusMessage: (error == null ? void 0 : error.message) || "Failed to save registration" });
+  }
+});
+
+const registration_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: registration_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const sendEmail_post = defineEventHandler(async (event) => {

@@ -2,7 +2,7 @@
   <div>
     <div class="flex items-center gap-3 mb-6">
       <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-        <Icon name="lucide:file-text" class="w-5 h-5 text-blue-600" />
+        <FileText class="w-5 h-5 text-blue-600" />
       </div>
       <div>
         <h2 class="text-2xl font-bold text-gray-900">Registration Type</h2>
@@ -24,7 +24,7 @@
         <div class="flex w-full items-center justify-between relative z-10">
           <div class="flex items-center gap-4">
             <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-              <Icon name="lucide:check-circle-2" class="w-5 h-5 text-blue-600" />
+              <CheckCircle2 class="w-5 h-5 text-blue-600" />
             </div>
             <div>
               <p class="font-semibold text-gray-900">{{ option.title }}</p>
@@ -42,7 +42,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { CheckIcon } from 'lucide-vue-next'
+import { CheckIcon, FileText, CheckCircle2 } from 'lucide-vue-next'
 
 const props = defineProps({
   registrationData: {

@@ -104,8 +104,8 @@ export const useRegistrationStore = defineStore('registration', {
           return !!(state.formData.banking.bankName && state.formData.banking.accountNumber && state.formData.banking.accountHolder && state.formData.banking.branchCode)
         case 5: // Address
           return !!(state.formData.address.streetAddress && state.formData.address.city && state.formData.address.province && state.formData.address.postalCode)
-        case 6: // Meters
-          return state.formData.meters.length > 0
+        case 6: // Meters - optional, so always complete
+          return true
         case 7: // Summary
           return true
         default:
@@ -135,8 +135,8 @@ export const useRegistrationStore = defineStore('registration', {
       this.formData.address = { ...this.formData.address, ...data }
     },
 
-    setMeters(data: Partial<RegistrationFormData['meters']>) {
-      this.formData.meters = { ...this.formData.meters, ...data }
+    setMeters(data: RegistrationFormData['meters']) {
+      this.formData.meters = Array.isArray(data) ? [...data] : []
     },
 
     goBack() {
