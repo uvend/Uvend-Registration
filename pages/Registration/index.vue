@@ -1,0 +1,294 @@
+<template>
+    <div v-if="isRegistrationEnabled" class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div class="max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-6 lg:py-8">
+            <!-- Logo Header -->
+            <div class="flex items-center justify-center mb-6 md:mb-8">
+                <div class="flex items-center gap-3 md:gap-4">
+                    <div class="flex items-center gap-2 md:gap-3">
+                        <h1 class="text-gray-900 font-bold text-xl md:text-2xl leading-tight tracking-wide" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                            U-Vend
+                        </h1>
+                        <div class="text-orange-500 font-semibold text-xs md:text-sm leading-tight tracking-wider">
+                            <div>PREPAID</div>
+                            <div>UTILITIES</div>
+                            <div>MANAGEMENT</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Container -->
+            <div class="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border-0 mb-12">
+                <form id="registrationForm" @submit.prevent="handleStepComplete" novalidate>
+                    <!-- Card Logo Header -->
+               
+
+                    <div class="p-6 lg:p-8 pt-4 lg:pt-6 overflow-y-auto max-h-[calc(100vh-220px)] md:max-h-[calc(100vh-260px)] scroll-area">
+                        <!-- Render paired steps on large screens for steps 2 and 3 -->
+                        <div v-if="pairedComponent" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <KeepAlive>
+                                    <component
+                                        ref="currentComponentRef"
+                                        :is="currentComponent"
+                                        :key="effectiveSteps[currentStep - 1].id"
+                                        v-model:type="formData.type"
+                                        :registration-data="formData"
+                                        @data-change="handleDataChange"
+                                    />
+                                </KeepAlive>
+                            </div>
+                            <div class="hidden lg:block bg-white/70 rounded-xl border-0 shadow-sm p-4 lg:p-6 self-start">
+                                <KeepAlive>
+                                    <component
+                                        :is="pairedComponent"
+                                        :key="'pair-' + effectiveSteps[currentStep - 1].id"
+                                        :registration-data="formData"
+                                        @data-change="handleDataChange"
+                                    />
+                                </KeepAlive>
+                            </div>
+                        </div>
+                        <!-- Render single step for type, documents, and summary (or on mobile) -->
+                        <div v-else>
+                            <KeepAlive>
+                                <component
+                                    ref="currentComponentRef"
+                                    :is="currentComponent"
+                                    :key="effectiveSteps[currentStep - 1].id"
+                                    v-model:type="formData.type"
+                                    :registration-data="formData"
+                                    @data-change="handleDataChange"
+                                />
+                            </KeepAlive>
+                        </div>
+                    </div>
+                    <div class="px-6 lg:px-8 pb-6 lg:pb-8 border-t border-gray-200 pt-6">
+                        <NavigationButtons
+                            :current-step="currentStep"
+                            :total-steps="effectiveSteps.length"
+                            :show-prev="currentStep > 1"
+                            :is-last-step="currentStep === effectiveSteps.length"
+                            :loading="loading"
+                            @prev="prevStep"
+                        />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div v-else class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div class="text-center px-4 bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border-0 max-w-md">
+            <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Lock class="w-8 h-8 text-gray-400" />
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Registration Not Available</h2>
+            <p class="text-gray-600 mb-6">Registration is currently not enabled in this environment.</p>
+            <NuxtLink to="/" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 font-medium">
+                <Icon name="lucide:arrow-left" class="w-4 h-4" />
+                Return to Home
+            </NuxtLink>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { ref, computed, markRaw, getCurrentInstance, watch, onMounted, onBeforeUnmount } from 'vue'
+import { Lock } from 'lucide-vue-next'
+import RegistrationType from '~/components/registration/RegistrationType.vue'
+import PersonalInfo from '~/components/registration/PersonalInfo.vue'
+import DocumentUpload from '~/components/registration/DocumentUpload.vue'
+import BankingDetails from '~/components/registration/BankingDetails.vue'
+import AddressDetails from '~/components/registration/AddressDetails.vue'
+import MeterDetails from '~/components/registration/MeterDetails.vue'
+import Summary from '~/components/registration/Summary.vue'
+import NavigationButtons from '~/components/registration/NavigationButtons.vue'
+import { useRegistrationStore } from '~/stores/registration'
+
+const config = useRuntimeConfig()
+const isRegistrationEnabled = computed(() => config.public.APP_ENV === 'registration')
+
+const registrationStore = useRegistrationStore()
+
+// Define 5 steps total (with paired components for steps 2 and 3) for large screens
+const steps5 = [
+    { id: 'type', name: 'Type', component: markRaw(RegistrationType), pairedComponent: null },
+    { id: 'personal-banking', name: 'Personal Info & Banking', component: markRaw(PersonalInfo), pairedComponent: markRaw(BankingDetails) },
+    { id: 'address-meters', name: 'Address & Meters', component: markRaw(AddressDetails), pairedComponent: markRaw(MeterDetails) },
+    { id: 'documents', name: 'Documents', component: markRaw(DocumentUpload), pairedComponent: null },
+    { id: 'summary', name: 'Summary', component: markRaw(Summary), pairedComponent: null }
+]
+
+// Define 7 steps for small screens (each renders alone)
+const steps7 = [
+    { id: 'type', name: 'Type', component: markRaw(RegistrationType) },
+    { id: 'personal', name: 'Personal Info', component: markRaw(PersonalInfo) },
+    { id: 'banking', name: 'Banking', component: markRaw(BankingDetails) },
+    { id: 'address', name: 'Address', component: markRaw(AddressDetails) },
+    { id: 'meters', name: 'Meters', component: markRaw(MeterDetails) },
+    { id: 'documents', name: 'Documents', component: markRaw(DocumentUpload) },
+    { id: 'summary', name: 'Summary', component: markRaw(Summary) }
+]
+
+const currentStep = ref(registrationStore.currentStep || 1)
+const loading = ref(false)
+const currentComponentRef = ref(null)
+
+// Track screen size to choose effective steps list
+const isLargeScreen = ref(true)
+
+onMounted(() => {
+    const mq = window.matchMedia('(min-width: 1024px)') // lg breakpoint
+    const update = () => { isLargeScreen.value = mq.matches }
+    update()
+    mq.addEventListener('change', update)
+    onBeforeUnmount(() => mq.removeEventListener('change', update))
+})
+
+// Use the store's formData getter
+const formData = computed(() => registrationStore.formData)
+
+// Effective steps depend on screen size
+const effectiveSteps = computed(() => (isLargeScreen.value ? steps5 : steps7))
+
+const currentComponent = computed(() => effectiveSteps.value[currentStep.value - 1]?.component)
+const pairedComponent = computed(() => {
+    if (!isLargeScreen.value) return null
+    const step = steps5[currentStep.value - 1]
+    return step?.pairedComponent || null
+})
+
+const prevStep = () => {
+    if (currentStep.value > 1) {
+        currentStep.value--
+        registrationStore.goBack()
+    }
+}
+
+// Keep store step in sync so back to first item is reliable across renders
+watch(currentStep, (value) => {
+    try {
+        registrationStore.currentStep = value
+    } catch {}
+})
+
+const handleStepComplete = async () => {
+    loading.value = true
+    try {
+        // Get the current component instance using template ref
+        const componentRef = currentComponentRef.value
+        
+        // Try to call submit method on the component
+        if (componentRef && typeof componentRef.submit === 'function') {
+            // Call submit for any side effects, but do not block progression
+            try {
+                componentRef.submit()
+            } catch (e) {
+                // Ignore validation failures to allow progression
+            }
+        }
+        
+        if (currentStep.value === effectiveSteps.value.length) {
+            await handleSubmit()
+        } else {
+            // Move to next step
+            currentStep.value++
+        }
+    } catch (error) {
+        // Do not block navigation on errors; optionally log for debugging
+        console.error('Step progression error (ignored):', error)
+    } finally {
+        loading.value = false
+    }
+}
+
+const handleSubmit = async () => {
+    try {
+        // Here you would typically send the data to your backend
+        console.log('Registration submitted:', formData.value)
+
+        useToast({
+            title: 'Success',
+            description: 'Your registration has been submitted successfully. We will send you a confirmation email shortly.',
+            variant: 'success'
+        })
+
+        await navigateTo('/')
+    } catch (error) {
+        console.error('Error submitting registration:', error)
+        throw new Error('There was an error submitting your registration. Please try again.')
+    }
+}
+
+const handleDataChange = (data) => {
+    // Store the data based on current step
+    const stepId = effectiveSteps.value[currentStep.value - 1].id
+    
+    console.log('Data change received:', { stepId, data })
+    
+    // Handle the new step structure
+    switch (stepId) {
+        case 'type':
+            registrationStore.setType(data)
+            break
+        case 'personal-banking':
+            // Determine which component emitted based on data structure or component type
+            // PersonalInfo and BankingDetails will emit their respective data
+            if (data.firstName || data.lastName || data.email || data.phone || data.idNumber || data.dateOfBirth) {
+                registrationStore.setPersonal(data)
+            } else if (data.accountHolder || data.bankName || data.accountType || data.branchCode || data.accountNumber) {
+                registrationStore.setBanking(data)
+            }
+            break
+        case 'address-meters':
+            // Determine which component emitted
+            if (data.streetAddress || data.suburb || data.city || data.province || data.postalCode || data.complexes) {
+                registrationStore.setAddress(data)
+            } else if (data.meters || Array.isArray(data)) {
+                registrationStore.setMeters(data)
+            }
+            break
+        case 'documents':
+            registrationStore.setDocuments(data)
+            break
+        case 'summary':
+            // Summary doesn't emit data changes
+            break
+    }
+    
+    console.log('Store data after update:', registrationStore.formData)
+}
+
+const handlePrev = () => {
+    if (currentStep.value > 1) {
+        currentStep.value--
+        registrationStore.goBack()
+    }
+}
+</script>
+
+<style scoped>
+/* Styled scrollbar for the scrollable component area */
+.scroll-area {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #93c5fd #f3f4f6; /* thumb, track */
+}
+
+.scroll-area::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scroll-area::-webkit-scrollbar-track {
+    background: #f3f4f6; /* gray-100 */
+    border-radius: 8px;
+}
+
+.scroll-area::-webkit-scrollbar-thumb {
+    background: #93c5fd; /* blue-300 */
+    border-radius: 8px;
+}
+
+.scroll-area::-webkit-scrollbar-thumb:hover {
+    background: #60a5fa; /* blue-400 */
+}
+</style>

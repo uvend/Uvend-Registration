@@ -1,0 +1,29 @@
+{
+  "name": "registration",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "html2pdf.js": "^0.10.1",
+    "nodemailer": "^6.9.8"
+  },
+  "devDependencies": {
+    "nuxt": "^3.13.1",
+    "@pinia/nuxt": "^0.5.1",
+    "pinia": "^2.1.7",
+    "lucide-vue-next": "^0.460.0",
+    "@nuxtjs/tailwindcss": "^6.12.2",
+    "tailwindcss": "^3.4.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.4",
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "@types/nodemailer": "^6.4.0"
+  }
+}
+
