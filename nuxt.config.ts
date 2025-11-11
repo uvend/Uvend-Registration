@@ -2,10 +2,11 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   compatibilityDate: "2025-03-23",
-  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss', '@nuxt/icon'],
+  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'],
   runtimeConfig: {
     public: {
-      APP_ENV: 'registration'
+      APP_ENV: 'registration',
+      googleMapsApiKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
     }
   }
 })

@@ -20,16 +20,6 @@
           <Loader2Icon v-else class="h-4 w-4 mr-2 animate-spin" />
           {{ isGeneratingPDF ? 'Generating PDF...' : 'Print Summary' }}
         </Button>
-        
-        <Button 
-          @click="submitRegistration" 
-          class="justify-center bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
-          :disabled="isSubmitting"
-        >
-          <FileIcon v-if="!isSubmitting" class="h-4 w-4 mr-2" />
-          <Loader2Icon v-else class="h-4 w-4 mr-2 animate-spin" />
-          {{ isSubmitting ? 'Submitting...' : 'Submit Registration' }}
-        </Button>
       </div>
     </div>
 
@@ -43,16 +33,6 @@
         <PrinterIcon v-if="!isGeneratingPDF" class="h-4 w-4 mr-2" />
         <Loader2Icon v-else class="h-4 w-4 mr-2 animate-spin" />
         {{ isGeneratingPDF ? 'Generating PDF...' : 'Print Summary' }}
-      </Button>
-      
-      <Button 
-        @click="submitRegistration" 
-        class="w-full justify-center h-10 px-3 text-sm bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
-        :disabled="isSubmitting"
-      >
-        <FileIcon v-if="!isSubmitting" class="h-4 w-4 mr-2" />
-        <Loader2Icon v-else class="h-4 w-4 mr-2 animate-spin" />
-        {{ isSubmitting ? 'Submitting...' : 'Submit Registration' }}
       </Button>
     </div>
 

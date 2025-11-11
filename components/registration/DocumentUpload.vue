@@ -24,18 +24,27 @@
                 </div>
               </div>
               <div class="text-sm text-gray-600">
-                <label for="idDocument" class="relative cursor-pointer rounded-md font-semibold text-blue-600 hover:text-blue-700 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
-                  <span>Upload ID document</span>
-                  <input id="idDocument" name="idDocument" type="file" class="sr-only" @change="handleFileUpload($event, 'idDocument')" accept=".pdf">
-                </label>
+                <div class="flex flex-col sm:flex-row gap-2 justify-center items-center">
+                  <label for="idDocument" class="relative cursor-pointer rounded-md font-semibold text-blue-600 hover:text-blue-700 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                    <span>Upload ID document</span>
+                    <input id="idDocument" name="idDocument" type="file" class="sr-only" @change="handleFileUpload($event, 'idDocument')" accept="image/*,.pdf" capture="environment">
+                  </label>
+                  <span class="text-gray-400">or</span>
+                  <button type="button" @click="captureFromCamera('idDocument')" class="font-semibold text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                    📷 Take photo
+                  </button>
+                </div>
                 <p class="mt-1">or drag and drop</p>
-                <p class="text-xs text-gray-500 mt-2">PDF only, up to 10MB</p>
+                <p class="text-xs text-gray-500 mt-2">Images or PDF, up to 10MB</p>
               </div>
             </div>
             
             <div v-else class="space-y-3">
               <div class="flex items-center justify-center">
-                <div class="p-3 bg-green-100 rounded-full">
+                <div v-if="formData.idDocument.type?.startsWith('image/')" class="max-w-xs">
+                  <img :src="getFilePreview(formData.idDocument)" alt="ID Document preview" class="max-h-48 w-auto mx-auto rounded-lg border-2 border-gray-200" />
+                </div>
+                <div v-else class="p-3 bg-green-100 rounded-full">
                   <FileCheck class="h-8 w-8 text-green-600" />
                 </div>
               </div>
@@ -61,18 +70,27 @@
                 </div>
               </div>
               <div class="text-sm text-gray-600">
-                <label for="proofOfAddress" class="relative cursor-pointer rounded-md font-semibold text-blue-600 hover:text-blue-700 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
-                  <span>Upload proof of address</span>
-                  <input id="proofOfAddress" name="proofOfAddress" type="file" class="sr-only" @change="handleFileUpload($event, 'proofOfAddress')" accept=".pdf">
-                </label>
+                <div class="flex flex-col sm:flex-row gap-2 justify-center items-center">
+                  <label for="proofOfAddress" class="relative cursor-pointer rounded-md font-semibold text-blue-600 hover:text-blue-700 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                    <span>Upload proof of address</span>
+                    <input id="proofOfAddress" name="proofOfAddress" type="file" class="sr-only" @change="handleFileUpload($event, 'proofOfAddress')" accept="image/*,.pdf" capture="environment">
+                  </label>
+                  <span class="text-gray-400">or</span>
+                  <button type="button" @click="captureFromCamera('proofOfAddress')" class="font-semibold text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                    📷 Take photo
+                  </button>
+                </div>
                 <p class="mt-1">or drag and drop</p>
-                <p class="text-xs text-gray-500 mt-2">PDF only, up to 10MB</p>
+                <p class="text-xs text-gray-500 mt-2">Images or PDF, up to 10MB</p>
               </div>
             </div>
             
             <div v-else class="space-y-3">
               <div class="flex items-center justify-center">
-                <div class="p-3 bg-green-100 rounded-full">
+                <div v-if="formData.proofOfAddress.type?.startsWith('image/')" class="max-w-xs">
+                  <img :src="getFilePreview(formData.proofOfAddress)" alt="Proof of address preview" class="max-h-48 w-auto mx-auto rounded-lg border-2 border-gray-200" />
+                </div>
+                <div v-else class="p-3 bg-green-100 rounded-full">
                   <FileCheck class="h-8 w-8 text-green-600" />
                 </div>
               </div>
@@ -98,18 +116,27 @@
                 </div>
               </div>
               <div class="text-sm text-gray-600">
-                <label for="bankStatement" class="relative cursor-pointer rounded-md font-semibold text-blue-600 hover:text-blue-700 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
-                  <span>Upload bank statement</span>
-                  <input id="bankStatement" name="bankStatement" type="file" class="sr-only" @change="handleFileUpload($event, 'bankStatement')" accept=".pdf">
-                </label>
+                <div class="flex flex-col sm:flex-row gap-2 justify-center items-center">
+                  <label for="bankStatement" class="relative cursor-pointer rounded-md font-semibold text-blue-600 hover:text-blue-700 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
+                    <span>Upload bank statement</span>
+                    <input id="bankStatement" name="bankStatement" type="file" class="sr-only" @change="handleFileUpload($event, 'bankStatement')" accept="image/*,.pdf" capture="environment">
+                  </label>
+                  <span class="text-gray-400">or</span>
+                  <button type="button" @click="captureFromCamera('bankStatement')" class="font-semibold text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                    📷 Take photo
+                  </button>
+                </div>
                 <p class="mt-1">or drag and drop</p>
-                <p class="text-xs text-gray-500 mt-2">PDF only, up to 10MB</p>
+                <p class="text-xs text-gray-500 mt-2">Images or PDF, up to 10MB</p>
               </div>
             </div>
             
             <div v-else class="space-y-3">
               <div class="flex items-center justify-center">
-                <div class="p-3 bg-green-100 rounded-full">
+                <div v-if="formData.bankStatement.type?.startsWith('image/')" class="max-w-xs">
+                  <img :src="getFilePreview(formData.bankStatement)" alt="Bank statement preview" class="max-h-48 w-auto mx-auto rounded-lg border-2 border-gray-200" />
+                </div>
+                <div v-else class="p-3 bg-green-100 rounded-full">
                   <FileCheck class="h-8 w-8 text-green-600" />
                 </div>
               </div>
@@ -169,17 +196,116 @@ const validateFile = (file) => {
   if (!file) return false
   
   const maxSize = 10 * 1024 * 1024 // 10MB
-  const allowedTypes = ['application/pdf']
+  const allowedTypes = [
+    'application/pdf',
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/webp',
+    'image/gif'
+  ]
   
   if (file.size > maxSize) {
     return 'File size must be less than 10MB'
   }
   
   if (!allowedTypes.includes(file.type)) {
-    return 'File must be PDF format only'
+    return 'File must be an image (JPEG, PNG, WebP, GIF) or PDF'
   }
   
   return true
+}
+
+const captureFromCamera = async (field) => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ 
+      video: { facingMode: 'environment' } // Use back camera on mobile
+    })
+    
+    // Create video element to show camera feed
+    const video = document.createElement('video')
+    video.srcObject = stream
+    video.autoplay = true
+    video.playsInline = true
+    
+    // Create a modal/dialog for camera preview
+    const modal = document.createElement('div')
+    modal.className = 'fixed inset-0 bg-black bg-opacity-75 z-50 flex flex-col items-center justify-center'
+    
+    const container = document.createElement('div')
+    container.className = 'bg-white rounded-xl p-6 max-w-md w-full mx-4'
+    
+    const videoContainer = document.createElement('div')
+    videoContainer.className = 'mb-4 rounded-lg overflow-hidden bg-black'
+    video.style.width = '100%'
+    video.style.height = 'auto'
+    video.style.maxHeight = '400px'
+    video.style.objectFit = 'contain'
+    videoContainer.appendChild(video)
+    
+    const buttonContainer = document.createElement('div')
+    buttonContainer.className = 'flex gap-3 justify-center'
+    
+    const captureBtn = document.createElement('button')
+    captureBtn.className = 'px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors'
+    captureBtn.textContent = 'Capture Photo'
+    
+    const cancelBtn = document.createElement('button')
+    cancelBtn.className = 'px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-400 transition-colors'
+    cancelBtn.textContent = 'Cancel'
+    
+    captureBtn.onclick = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(video, 0, 0)
+      
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], `camera-capture-${field}-${Date.now()}.jpg`, { type: 'image/jpeg' })
+          const validation = validateFile(file)
+          
+          if (validation === true) {
+            formData.value[field] = file
+            if (manualErrors.value[field]) {
+              const updated = { ...manualErrors.value }
+              delete updated[field]
+              manualErrors.value = updated
+            }
+            emitDocuments()
+          } else {
+            manualErrors.value = { ...manualErrors.value, [field]: validation }
+          }
+        }
+        
+        // Clean up
+        stream.getTracks().forEach(track => track.stop())
+        document.body.removeChild(modal)
+      }, 'image/jpeg', 0.9)
+    }
+    
+    cancelBtn.onclick = () => {
+      stream.getTracks().forEach(track => track.stop())
+      document.body.removeChild(modal)
+    }
+    
+    buttonContainer.appendChild(captureBtn)
+    buttonContainer.appendChild(cancelBtn)
+    
+    container.appendChild(videoContainer)
+    container.appendChild(buttonContainer)
+    modal.appendChild(container)
+    document.body.appendChild(modal)
+    
+    // Wait for video to be ready
+    video.onloadedmetadata = () => {
+      video.play()
+    }
+  } catch (error) {
+    console.error('Error accessing camera:', error)
+    alert('Unable to access camera. Please ensure you have granted camera permissions and try again.')
+  }
 }
 
 const handleFileUpload = (event, field) => {
@@ -200,12 +326,26 @@ const handleFileUpload = (event, field) => {
 }
 
 const removeFile = (field) => {
+  const file = formData.value[field]
+  if (file && file.previewUrl) {
+    URL.revokeObjectURL(file.previewUrl)
+  }
   formData.value[field] = null
   if (manualErrors.value[field]) {
     const updated = { ...manualErrors.value }
     delete updated[field]
     manualErrors.value = updated
   }
+}
+
+const getFilePreview = (file) => {
+  if (!file) return ''
+  if (file.previewUrl) return file.previewUrl
+  if (file.type?.startsWith('image/')) {
+    file.previewUrl = URL.createObjectURL(file)
+    return file.previewUrl
+  }
+  return ''
 }
 
 const errors = computed(() => {

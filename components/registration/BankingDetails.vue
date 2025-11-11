@@ -25,21 +25,29 @@
             v-model="formData.accountHolder"
             type="text"
             placeholder="Enter account holder name"
+            maxlength="100"
             class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
             :class="{ 
-              'border-red-500 focus:ring-red-500': errors.accountHolder,
-              'border-green-500 focus:ring-green-500': formData.accountHolder && !errors.accountHolder
+              'border-red-500 focus:ring-red-500': touched.accountHolder && errors.accountHolder,
+              'border-green-500 focus:ring-green-500': isFieldValid('accountHolder')
             }"
             aria-describedby="accountHolder-error"
+            @input="markTouched('accountHolder')"
           />
           <p id="accountHolder-hint" class="text-xs text-gray-500">Enter the name exactly as it appears on your bank account</p>
           <span 
-            v-if="errors.accountHolder" 
+            v-if="touched.accountHolder && errors.accountHolder" 
             id="accountHolder-error" 
             class="text-sm text-red-500 flex items-center gap-1"
           >
             <AlertCircle class="h-4 w-4" />
             {{ errors.accountHolder }}
+          </span>
+          <span 
+            v-else-if="isFieldValid('accountHolder')" 
+            class="text-sm text-green-500 flex items-center gap-1"
+          >
+            <CheckCircle class="h-4 w-4" />
           </span>
         </div>
 
@@ -50,19 +58,27 @@
             v-model="formData.bankName"
             type="text"
             placeholder="Enter bank name"
+            maxlength="100"
             class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
             :class="{ 
-              'border-red-500 focus:ring-red-500': errors.bankName,
-              'border-green-500 focus:ring-green-500': formData.bankName && !errors.bankName
+              'border-red-500 focus:ring-red-500': touched.bankName && errors.bankName,
+              'border-green-500 focus:ring-green-500': isFieldValid('bankName')
             }"
+            @input="markTouched('bankName')"
           />
           <span 
-            v-if="errors.bankName" 
+            v-if="touched.bankName && errors.bankName" 
             id="bankName-error" 
             class="text-sm text-red-500 flex items-center gap-1"
           >
             <AlertCircle class="h-4 w-4" />
             {{ errors.bankName }}
+          </span>
+          <span 
+            v-else-if="isFieldValid('bankName')" 
+            class="text-sm text-green-500 flex items-center gap-1"
+          >
+            <CheckCircle class="h-4 w-4" />
           </span>
         </div>
 
@@ -81,18 +97,24 @@
             placeholder="Enter account number"
             class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
             :class="{ 
-              'border-red-500 focus:ring-red-500': errors.accountNumber,
-              'border-green-500 focus:ring-green-500': formData.accountNumber && !errors.accountNumber
+              'border-red-500 focus:ring-red-500': touched.accountNumber && errors.accountNumber,
+              'border-green-500 focus:ring-green-500': isFieldValid('accountNumber')
             }"
             @input="formatAccountNumber"
           />
           <span 
-            v-if="errors.accountNumber" 
+            v-if="touched.accountNumber && errors.accountNumber" 
             id="accountNumber-error" 
             class="text-sm text-red-500 flex items-center gap-1"
           >
             <AlertCircle class="h-4 w-4" />
             {{ errors.accountNumber }}
+          </span>
+          <span 
+            v-else-if="isFieldValid('accountNumber')" 
+            class="text-sm text-green-500 flex items-center gap-1"
+          >
+            <CheckCircle class="h-4 w-4" />
           </span>
         </div>
 
@@ -106,19 +128,27 @@
             :class="cn(
               'bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200',
               { 
-                'border-red-500 focus:ring-red-500': errors.accountType,
-                'border-green-500 focus:ring-green-500': formData.accountType && formData.accountType !== '' && !errors.accountType
+                'border-red-500 focus:ring-red-500': touched.accountType && errors.accountType,
+                'border-green-500 focus:ring-green-500': isFieldValid('accountType')
               }
             )"
             aria-describedby="accountType-error"
+            @update:model-value="() => markTouched('accountType')"
           />
           <span 
-            v-if="errors.accountType" 
+            v-if="touched.accountType && errors.accountType" 
             id="accountType-error" 
             class="text-sm text-red-500 flex items-center gap-1"
           >
             <AlertCircle class="h-4 w-4" />
             {{ errors.accountType }}
+          </span>
+          <span 
+            v-else-if="isFieldValid('accountType')" 
+            id="accountType-success"
+            class="text-sm text-green-500 flex items-center gap-1"
+          >
+            <CheckCircle class="h-4 w-4" />
           </span>
         </div>
 
@@ -137,20 +167,26 @@
             placeholder="Enter 6-digit branch code"
             class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
             :class="{ 
-              'border-red-500 focus:ring-red-500': errors.branchCode,
-              'border-green-500 focus:ring-green-500': formData.branchCode && !errors.branchCode
+              'border-red-500 focus:ring-red-500': touched.branchCode && errors.branchCode,
+              'border-green-500 focus:ring-green-500': isFieldValid('branchCode')
             }"
             aria-describedby="branchCode-error branchCode-hint"
             @input="formatBranchCode"
           />
           <p id="branchCode-hint" class="text-xs text-gray-500">Enter your bank's 6-digit branch/sorting code</p>
           <span 
-            v-if="errors.branchCode" 
+            v-if="touched.branchCode && errors.branchCode" 
             id="branchCode-error" 
             class="text-sm text-red-500 flex items-center gap-1"
           >
             <AlertCircle class="h-4 w-4" />
             {{ errors.branchCode }}
+          </span>
+          <span 
+            v-else-if="isFieldValid('branchCode')" 
+            class="text-sm text-green-500 flex items-center gap-1"
+          >
+            <CheckCircle class="h-4 w-4" />
           </span>
         </div>
         </div>
@@ -159,13 +195,13 @@
   </div>
 </template>
 
-<script setup>
-import { ref, watch, computed } from 'vue'
-import Label from '~/components/ui/label.vue'
-import Input from '~/components/ui/input.vue'
-import { AlertCircle, CreditCard } from 'lucide-vue-next'
-import Select from '~/components/ui/select.vue'
-import { cn } from '~/utils/cn'
+<script setup lang="ts">
+import { ref, watch, reactive } from 'vue'
+import Label from '../ui/label.vue'
+import Input from '../ui/input.vue'
+import { AlertCircle, CheckCircle, CreditCard } from 'lucide-vue-next'
+import Select from '../ui/select.vue'
+import { cn } from '../../utils/cn'
 
 const props = defineProps({
   registrationData: {
@@ -176,7 +212,17 @@ const props = defineProps({
 
 const emit = defineEmits(['dataChange'])
 
-const defaultBankingState = () => ({
+type BankingFormState = {
+  accountHolder: string
+  bankName: string
+  accountNumber: string
+  accountType: string
+  branchCode: string
+}
+
+type BankingTouchedState = Record<keyof BankingFormState, boolean>
+
+const defaultBankingState = (): BankingFormState => ({
   accountHolder: '',
   bankName: '',
   accountNumber: '',
@@ -184,10 +230,58 @@ const defaultBankingState = () => ({
   branchCode: ''
 })
 
-const formData = ref(defaultBankingState())
+const formData = ref<BankingFormState>(defaultBankingState())
 const isSyncingFromProps = ref(false)
+const errors = reactive<Record<keyof BankingFormState, string>>({
+  accountHolder: '',
+  bankName: '',
+  accountNumber: '',
+  accountType: '',
+  branchCode: ''
+})
+const touched = reactive<BankingTouchedState>({
+  accountHolder: false,
+  bankName: false,
+  accountNumber: false,
+  accountType: false,
+  branchCode: false
+})
 
-const accountTypeOptions = [
+const REQUIRED_MESSAGE = '* field must be filled'
+
+const debugValidation = (field: string, value: unknown, error: string) => {
+  console.debug('[BankingDetails] validate', {
+    field,
+    value,
+    error,
+    touched: touched[field as keyof typeof touched]
+  })
+}
+
+const resetTouched = () => {
+  ;(Object.keys(touched) as Array<keyof BankingTouchedState>).forEach((key) => {
+    touched[key] = false
+  })
+}
+
+const markTouched = (field: keyof BankingTouchedState) => {
+  touched[field] = true
+  // Trigger validation immediately when field is touched
+  const value = formData.value[field]
+  errors[field] = validateRequired(value)
+}
+
+const isFieldValid = (field: keyof BankingFormState) => {
+  const value = formData.value[field]
+  return Boolean(
+    touched[field] &&
+      !errors[field] &&
+      value &&
+      value.toString().trim().length > 0
+  )
+}
+
+const accountTypeOptions: Array<{ value: string; label: string }> = [
   { value: 'savings', label: 'Savings' },
   { value: 'current', label: 'Current/Cheque' },
   { value: 'transmission', label: 'Transmission' }
@@ -211,54 +305,62 @@ watch(() => props.registrationData?.banking, (newValue) => {
   }
 
   formData.value = synced
+  resetTouched()
   isSyncingFromProps.value = false
 }, { immediate: true, deep: true })
 
 // Format account number to only allow numbers
-const formatAccountNumber = (event) => {
-  formData.value.accountNumber = event.target.value.replace(/\D/g, '').slice(0, 16)
+const formatAccountNumber = (event: Event) => {
+  const target = event.target as HTMLInputElement | null
+  const formatted = target?.value.replace(/\D/g, '').slice(0, 16) ?? ''
+  formData.value.accountNumber = formatted
+  markTouched('accountNumber')
+  // Force validation update
+  errors.accountNumber = validateRequired(formatted)
 }
 
 // Format branch code to only allow numbers
-const formatBranchCode = (event) => {
-  formData.value.branchCode = event.target.value.replace(/\D/g, '').slice(0, 6)
+const formatBranchCode = (event: Event) => {
+  const target = event.target as HTMLInputElement | null
+  const formatted = target?.value.replace(/\D/g, '').slice(0, 6) ?? ''
+  formData.value.branchCode = formatted
+  markTouched('branchCode')
+  // Force validation update
+  errors.branchCode = validateRequired(formatted)
 }
 
-const errors = computed(() => {
-  const current = formData.value
-  const newErrors = {}
-  
-  // Account holder - 1+ character (no strict limit)
-  if (!current.accountHolder || current.accountHolder.trim().length === 0) {
-    newErrors.accountHolder = 'Account holder name is required'
+const validateRequired = (value: string | null | undefined) => {
+  const strValue = value?.toString().trim() ?? ''
+  if (!strValue || strValue.length === 0) {
+    return REQUIRED_MESSAGE
   }
+  return ''
+}
 
-  // Bank name - 1+ character
-  if (!current.bankName || current.bankName.trim().length === 0) {
-    newErrors.bankName = 'Bank name is required'
-  }
+watch(() => formData.value.accountHolder, (val) => {
+  errors.accountHolder = validateRequired(val)
+  debugValidation('accountHolder', val, errors.accountHolder)
+}, { immediate: true })
 
-  // Account number - explicit limit: 5-16 digits
-  if (!current.accountNumber || current.accountNumber.trim().length === 0) {
-    newErrors.accountNumber = 'Account number is required'
-  } else if (!/^\d{5,16}$/.test(current.accountNumber)) {
-    newErrors.accountNumber = 'Please enter a valid account number (5-16 digits)'
-  }
+watch(() => formData.value.bankName, (val) => {
+  errors.bankName = validateRequired(val)
+  debugValidation('bankName', val, errors.bankName)
+}, { immediate: true })
 
-  // Account type - dropdown, must be selected (not empty string)
-  if (!current.accountType || current.accountType === '') {
-    newErrors.accountType = 'Account type is required'
-  }
+watch(() => formData.value.accountNumber, (val) => {
+  errors.accountNumber = validateRequired(val)
+  debugValidation('accountNumber', val, errors.accountNumber)
+}, { immediate: true })
 
-  // Branch code - explicit limit: exactly 6 digits
-  if (!current.branchCode || current.branchCode.trim().length === 0) {
-    newErrors.branchCode = 'Branch code is required'
-  } else if (!/^\d{6}$/.test(current.branchCode)) {
-    newErrors.branchCode = 'Please enter a valid 6-digit branch code'
-  }
+watch(() => formData.value.accountType, (val) => {
+  errors.accountType = validateRequired(val)
+  debugValidation('accountType', val, errors.accountType)
+}, { immediate: true })
 
-  return newErrors
-})
+watch(() => formData.value.branchCode, (val) => {
+  errors.branchCode = validateRequired(val)
+  debugValidation('branchCode', val, errors.branchCode)
+}, { immediate: true })
 
 // Emit whenever the form changes (skip when syncing from props)
 watch(formData, (newValue) => {
@@ -276,11 +378,17 @@ watch(formData, (newValue) => {
 
 // Expose form data to parent
 defineExpose({
-  validate: () => true,
+  validate: () => Object.values(errors).every((message) => message === ''),
   getData: () => formData.value,
   submit: () => {
+    ;(Object.keys(touched) as Array<keyof BankingTouchedState>).forEach((key) => {
+      touched[key] = true
+    })
     emit('dataChange', { ...formData.value })
-    return true
-  }
+    return Object.values(errors).every((message) => message === '')
+  },
+  errors,
+  touched,
+  isFieldValid
 })
 </script> 

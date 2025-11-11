@@ -12,21 +12,21 @@
     "prisma:deploy": "prisma migrate deploy"
   },
   "dependencies": {
-    "@prisma/client": "^5.20.0",
+    "@googlemaps/js-api-loader": "^1.16.8",
+    "@prisma/client": "^6.19.0",
     "html2pdf.js": "^0.10.1",
     "nodemailer": "^6.9.8"
   },
   "devDependencies": {
-    "@nuxt/icon": "^2.1.0",
     "@nuxtjs/tailwindcss": "^6.12.2",
     "@pinia/nuxt": "^0.5.1",
     "@types/node": "^20.0.0",
     "@types/nodemailer": "^6.4.0",
     "clsx": "^2.1.1",
     "lucide-vue-next": "^0.460.0",
-    "nuxt": "^3.13.1",
+    "nuxt": "^4.2.1",
     "pinia": "^2.1.7",
-    "prisma": "^5.20.0",
+    "prisma": "^6.19.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.0.0"

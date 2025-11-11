@@ -10,7 +10,7 @@ declare module "nitropack/types" {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/send-email.post').default>>>>
     }
     '/__nuxt_error': {
-      'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/nuxt/dist/core/runtime/nitro/handlers/renderer').default>>>>
+      'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/@nuxt/nitro-server/dist/runtime/handlers/renderer').default>>>>
     }
     '/__nuxt_island/**': {
       'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/#internal/nuxt/island-renderer').default>>>>

@@ -16,16 +16,24 @@
           <div class="space-y-3">
             <Label for="firstName" class="text-gray-700 font-medium">First Name</Label>
           <Input
-              id="firstName"
-              v-model="formData.firstName"
-              type="text"
-              placeholder="Enter your first name"
-              class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
-            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.firstName }"
-            />
-          <span v-if="errors.firstName" class="text-sm text-red-500 flex items-center gap-1">
+            id="firstName"
+            v-model="formData.firstName"
+            type="text"
+            placeholder="Enter your first name"
+            maxlength="100"
+            class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
+            :class="{
+              'border-red-500 focus:border-red-500 focus:ring-red-200': touched.firstName && errors.firstName,
+              'border-green-500 focus:border-green-500 focus:ring-green-200': isFieldValid('firstName')
+            }"
+            @input="markTouched('firstName')"
+          />
+          <span v-if="touched.firstName && errors.firstName" class="text-sm text-red-500 flex items-center gap-1">
             <AlertCircle class="h-4 w-4" />
             {{ errors.firstName }}
+          </span>
+          <span v-else-if="isFieldValid('firstName')" class="text-sm text-green-500 flex items-center gap-1">
+            <CheckCircle class="h-4 w-4" />
           </span>
         </div>
 
@@ -36,12 +44,20 @@
             v-model="formData.lastName"
             type="text"
             placeholder="Enter your last name"
+            maxlength="100"
             class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
-            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.lastName }"
+            :class="{
+              'border-red-500 focus:border-red-500 focus:ring-red-200': touched.lastName && errors.lastName,
+              'border-green-500 focus:border-green-500 focus:ring-green-200': isFieldValid('lastName')
+            }"
+            @input="markTouched('lastName')"
           />
-          <span v-if="errors.lastName" class="text-sm text-red-500 flex items-center gap-1">
+          <span v-if="touched.lastName && errors.lastName" class="text-sm text-red-500 flex items-center gap-1">
             <AlertCircle class="h-4 w-4" />
             {{ errors.lastName }}
+          </span>
+          <span v-else-if="isFieldValid('lastName')" class="text-sm text-green-500 flex items-center gap-1">
+            <CheckCircle class="h-4 w-4" />
           </span>
         </div>
 
@@ -53,11 +69,18 @@
             type="email"
             placeholder="Enter your email"
             class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
-            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.email }"
+            :class="{
+              'border-red-500 focus:border-red-500 focus:ring-red-200': touched.email && errors.email,
+              'border-green-500 focus:border-green-500 focus:ring-green-200': isFieldValid('email')
+            }"
+            @input="markTouched('email')"
           />
-          <span v-if="errors.email" class="text-sm text-red-500 flex items-center gap-1">
+          <span v-if="touched.email && errors.email" class="text-sm text-red-500 flex items-center gap-1">
             <AlertCircle class="h-4 w-4" />
             {{ errors.email }}
+          </span>
+          <span v-else-if="isFieldValid('email')" class="text-sm text-green-500 flex items-center gap-1">
+            <CheckCircle class="h-4 w-4" />
           </span>
         </div>
 
@@ -69,11 +92,18 @@
             type="tel"
             placeholder="Enter your phone number"
             class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
-            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.phone }"
+            :class="{
+              'border-red-500 focus:border-red-500 focus:ring-red-200': touched.phone && errors.phone,
+              'border-green-500 focus:border-green-500 focus:ring-green-200': isFieldValid('phone')
+            }"
+            @input="markTouched('phone')"
           />
-          <span v-if="errors.phone" class="text-sm text-red-500 flex items-center gap-1">
+          <span v-if="touched.phone && errors.phone" class="text-sm text-red-500 flex items-center gap-1">
             <AlertCircle class="h-4 w-4" />
             {{ errors.phone }}
+          </span>
+          <span v-else-if="isFieldValid('phone')" class="text-sm text-green-500 flex items-center gap-1">
+            <CheckCircle class="h-4 w-4" />
           </span>
         </div>
 
@@ -85,11 +115,18 @@
             type="text"
             placeholder="Enter your ID number"
             class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
-            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.idNumber }"
+            :class="{
+              'border-red-500 focus:border-red-500 focus:ring-red-200': touched.idNumber && errors.idNumber,
+              'border-green-500 focus:border-green-500 focus:ring-green-200': isFieldValid('idNumber')
+            }"
+            @input="markTouched('idNumber')"
           />
-          <span v-if="errors.idNumber" class="text-sm text-red-500 flex items-center gap-1">
+          <span v-if="touched.idNumber && errors.idNumber" class="text-sm text-red-500 flex items-center gap-1">
             <AlertCircle class="h-4 w-4" />
             {{ errors.idNumber }}
+          </span>
+          <span v-else-if="isFieldValid('idNumber')" class="text-sm text-green-500 flex items-center gap-1">
+            <CheckCircle class="h-4 w-4" />
           </span>
         </div>
 
@@ -100,11 +137,18 @@
             v-model="formData.dateOfBirth"
             type="date"
             class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
-            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': errors.dateOfBirth }"
+            :class="{
+              'border-red-500 focus:border-red-500 focus:ring-red-200': touched.dateOfBirth && errors.dateOfBirth,
+              'border-green-500 focus:border-green-500 focus:ring-green-200': isFieldValid('dateOfBirth')
+            }"
+            @input="markTouched('dateOfBirth')"
           />
-          <span v-if="errors.dateOfBirth" class="text-sm text-red-500 flex items-center gap-1">
+          <span v-if="touched.dateOfBirth && errors.dateOfBirth" class="text-sm text-red-500 flex items-center gap-1">
             <AlertCircle class="h-4 w-4" />
             {{ errors.dateOfBirth }}
+          </span>
+          <span v-else-if="isFieldValid('dateOfBirth')" class="text-sm text-green-500 flex items-center gap-1">
+            <CheckCircle class="h-4 w-4" />
           </span>
         </div>
         </div>
@@ -113,11 +157,11 @@
   </div>
 </template>
 
-<script setup>
-import { ref, watch, computed } from 'vue'
-import Label from '~/components/ui/label.vue'
-import Input from '~/components/ui/input.vue'
-import { AlertCircle, User } from 'lucide-vue-next'
+<script setup lang="ts">
+import { ref, watch, reactive } from 'vue'
+import Label from '../ui/label.vue'
+import Input from '../ui/input.vue'
+import { AlertCircle, CheckCircle, User } from 'lucide-vue-next'
 
 const props = defineProps({
   registrationData: {
@@ -128,7 +172,18 @@ const props = defineProps({
 
 const emit = defineEmits(['dataChange'])
 
-const defaultPersonalState = () => ({
+type PersonalFormState = {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  idNumber: string
+  dateOfBirth: string
+}
+
+type PersonalTouchedState = Record<keyof PersonalFormState, boolean>
+
+const defaultPersonalState = (): PersonalFormState => ({
   firstName: '',
   lastName: '',
   email: '',
@@ -137,8 +192,55 @@ const defaultPersonalState = () => ({
   dateOfBirth: ''
 })
 
-const formData = ref(defaultPersonalState())
+const formData = ref<PersonalFormState>(defaultPersonalState())
 const isSyncingFromProps = ref(false)
+const errors = reactive<Record<keyof PersonalFormState, string>>({
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  idNumber: '',
+  dateOfBirth: ''
+})
+const touched = reactive<PersonalTouchedState>({
+  firstName: false,
+  lastName: false,
+  email: false,
+  phone: false,
+  idNumber: false,
+  dateOfBirth: false
+})
+
+const REQUIRED_MESSAGE = '* field must be filled'
+
+const debugValidation = (field: string, value: unknown, error: string) => {
+  console.debug('[PersonalInfo] validate', {
+    field,
+    value,
+    error,
+    touched: touched[field as keyof typeof touched]
+  })
+}
+
+const resetTouched = () => {
+  ;(Object.keys(touched) as Array<keyof PersonalTouchedState>).forEach((key) => {
+    touched[key] = false
+  })
+}
+
+const markTouched = (field: keyof PersonalTouchedState) => {
+  touched[field] = true
+}
+
+const isFieldValid = (field: keyof PersonalFormState) => {
+  const value = formData.value[field]
+  return Boolean(
+    touched[field] &&
+      !errors[field] &&
+      value &&
+      value.toString().trim().length > 0
+  )
+}
 
 // Initialize / sync form data from props if available
 watch(() => props.registrationData?.personal, (newValue) => {
@@ -151,36 +253,46 @@ watch(() => props.registrationData?.personal, (newValue) => {
     ...defaultPersonalState(),
     ...JSON.parse(JSON.stringify(newValue))
   }
+  resetTouched()
   isSyncingFromProps.value = false
 }, { immediate: true, deep: true })
 
-const errors = computed(() => {
-  const current = formData.value
-  const newErrors = {}
+const validateRequired = (value: string | null | undefined) => {
+  if (!value || !value.toString().trim()) {
+    return REQUIRED_MESSAGE
+  }
+  return ''
+}
 
-  if (!current.firstName || current.firstName.trim().length === 0) {
-    newErrors.firstName = 'First name is required'
-  }
-  if (!current.lastName || current.lastName.trim().length === 0) {
-    newErrors.lastName = 'Last name is required'
-  }
-  if (!current.email || current.email.trim().length === 0) {
-    newErrors.email = 'Email is required'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(current.email)) {
-    newErrors.email = 'Please enter a valid email address'
-  }
-  if (!current.phone || current.phone.trim().length === 0) {
-    newErrors.phone = 'Phone number is required'
-  }
-  if (!current.idNumber || current.idNumber.trim().length === 0) {
-    newErrors.idNumber = 'ID number is required'
-  }
-  if (!current.dateOfBirth || current.dateOfBirth.trim().length === 0) {
-    newErrors.dateOfBirth = 'Date of birth is required'
-  }
+watch(() => formData.value.firstName, (val) => {
+  errors.firstName = validateRequired(val)
+  debugValidation('firstName', val, errors.firstName)
+}, { immediate: true })
 
-  return newErrors
-})
+watch(() => formData.value.lastName, (val) => {
+  errors.lastName = validateRequired(val)
+  debugValidation('lastName', val, errors.lastName)
+}, { immediate: true })
+
+watch(() => formData.value.email, (val) => {
+  errors.email = validateRequired(val)
+  debugValidation('email', val, errors.email)
+}, { immediate: true })
+
+watch(() => formData.value.phone, (val) => {
+  errors.phone = validateRequired(val)
+  debugValidation('phone', val, errors.phone)
+}, { immediate: true })
+
+watch(() => formData.value.idNumber, (val) => {
+  errors.idNumber = validateRequired(val)
+  debugValidation('idNumber', val, errors.idNumber)
+}, { immediate: true })
+
+watch(() => formData.value.dateOfBirth, (val) => {
+  errors.dateOfBirth = validateRequired(val)
+  debugValidation('dateOfBirth', val, errors.dateOfBirth)
+}, { immediate: true })
 
 // Emit whenever the form changes (skip when syncing from props)
 watch(formData, (newValue) => {
@@ -193,11 +305,17 @@ watch(formData, (newValue) => {
 
 // Expose form data to parent
 defineExpose({
-  validate: () => true,
+  validate: () => Object.values(errors).every((message) => message === ''),
   getData: () => formData.value,
   submit: () => {
+    ;(Object.keys(touched) as Array<keyof PersonalTouchedState>).forEach((key) => {
+      touched[key] = true
+    })
     emit('dataChange', JSON.parse(JSON.stringify(formData.value)))
-    return true
-  }
+    return Object.values(errors).every((message) => message === '')
+  },
+  errors,
+  touched,
+  isFieldValid
 })
 </script> 
