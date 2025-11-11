@@ -24,8 +24,8 @@ FROM node:20-slim AS prod-deps
 WORKDIR /app
 
 COPY package*.json ./
-# Install only production dependencies
-RUN npm ci --only=production
+# Install only production dependencies (skip postinstall scripts since nuxt is a dev dependency)
+RUN npm ci --omit=dev --ignore-scripts
 
 FROM node:20-slim AS runner
 
@@ -35,15 +35,15 @@ ENV NODE_ENV=production \
 
 WORKDIR /app
 
+# Copy production dependencies first
+COPY --from=prod-deps /app/node_modules ./node_modules
+
 # Copy Prisma schema (needed for migrations at runtime if needed)
 COPY --from=build /app/prisma ./prisma
 
-# Copy Prisma generated client from build stage
+# Copy Prisma generated client from build stage (overwrites the one from prod-deps)
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
-
-# Copy production dependencies
-COPY --from=prod-deps /app/node_modules ./node_modules
 
 # Copy built application
 COPY --from=build /app/.output .output
