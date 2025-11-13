@@ -158,7 +158,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, reactive } from 'vue'
+import { ref, watch, reactive, nextTick } from 'vue'
 import Label from '../ui/label.vue'
 import Input from '../ui/input.vue'
 import { AlertCircle, CheckCircle, User } from 'lucide-vue-next'
@@ -242,19 +242,53 @@ const isFieldValid = (field: keyof PersonalFormState) => {
   )
 }
 
+// Helper to compare two objects deeply
+const deepEqual = (a: any, b: any): boolean => {
+  if (a === b) return true
+  if (!a || !b) return false
+  if (typeof a !== 'object' || typeof b !== 'object') return false
+  
+  const keysA = Object.keys(a)
+  const keysB = Object.keys(b)
+  if (keysA.length !== keysB.length) return false
+  
+  for (const key of keysA) {
+    if (!keysB.includes(key)) return false
+    if (a[key] !== b[key] && typeof a[key] === 'object' && typeof b[key] === 'object') {
+      if (!deepEqual(a[key], b[key])) return false
+    } else if (a[key] !== b[key]) {
+      return false
+    }
+  }
+  return true
+}
+
+// Store last emitted value to prevent duplicate emissions
+const lastEmittedValue = ref<string>('')
+
 // Initialize / sync form data from props if available
 watch(() => props.registrationData?.personal, (newValue) => {
   if (!newValue) {
     return
   }
 
-  isSyncingFromProps.value = true
-  formData.value = {
+  const synced = {
     ...defaultPersonalState(),
     ...JSON.parse(JSON.stringify(newValue))
   }
-  resetTouched()
-  isSyncingFromProps.value = false
+
+  // Only update if actually different
+  if (!deepEqual(formData.value, synced)) {
+    isSyncingFromProps.value = true
+    formData.value = synced
+    resetTouched()
+    // Use nextTick to ensure sync is complete before allowing emissions
+    nextTick(() => {
+      isSyncingFromProps.value = false
+      // Update last emitted to prevent immediate re-emission
+      lastEmittedValue.value = JSON.stringify(formData.value)
+    })
+  }
 }, { immediate: true, deep: true })
 
 const validateRequired = (value: string | null | undefined) => {
@@ -300,7 +334,14 @@ watch(formData, (newValue) => {
     return
   }
 
-  emit('dataChange', JSON.parse(JSON.stringify(newValue)))
+  const payload = JSON.parse(JSON.stringify(newValue))
+  const payloadString = JSON.stringify(payload)
+  
+  // Only emit if the data actually changed
+  if (payloadString !== lastEmittedValue.value) {
+    lastEmittedValue.value = payloadString
+    emit('dataChange', payload)
+  }
 }, { deep: true, immediate: false })
 
 // Expose form data to parent

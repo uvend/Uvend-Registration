@@ -243,9 +243,9 @@ const addressKeys = ['streetAddress', 'suburb', 'city', 'province', 'postalCode'
 
 const handleDataChange = (data) => {
     // Store the data based on current step
-    const stepId = effectiveSteps.value[currentStep.value - 1].id
+    const stepId = effectiveSteps.value[currentStep.value - 1]?.id
     
-    console.log('Data change received:', { stepId, data })
+    if (!stepId) return
     
     // Handle the new step structure
     switch (stepId) {
@@ -261,7 +261,7 @@ const handleDataChange = (data) => {
         case 'personal-banking':
             // Determine which component emitted based on data structure or component type
             // PersonalInfo and BankingDetails will emit their respective data
-          if (isObject(data) && personalKeys.some(key => key in data)) {
+            if (isObject(data) && personalKeys.some(key => key in data)) {
                 if (hasChanged(registrationStore.formData.personal, data)) {
                     registrationStore.setPersonal(data)
                 }
@@ -273,7 +273,7 @@ const handleDataChange = (data) => {
             break
         case 'address-meters':
             // Determine which component emitted
-          if (isObject(data) && addressKeys.some(key => key in data)) {
+            if (isObject(data) && addressKeys.some(key => key in data)) {
                 if (hasChanged(registrationStore.formData.address, data)) {
                     registrationStore.setAddress(data)
                 }
@@ -298,8 +298,6 @@ const handleDataChange = (data) => {
             // Summary doesn't emit data changes
             break
     }
-    
-    console.log('Store data after update:', registrationStore.formData)
 }
 
 const handlePrev = () => {
