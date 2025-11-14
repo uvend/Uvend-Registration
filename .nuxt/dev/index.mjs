@@ -2210,6 +2210,57 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const prisma = new PrismaClient();
+const createTransporter = () => {
+  const emailService = process.env.EMAIL_SERVICE || "smtp";
+  if (emailService === "sendgrid") {
+    if (!process.env.SENDGRID_API_KEY) {
+      throw new Error("SENDGRID_API_KEY is required when using SendGrid");
+    }
+    return nodemailer.createTransport({
+      service: "SendGrid",
+      auth: {
+        user: "apikey",
+        pass: process.env.SENDGRID_API_KEY
+      }
+    });
+  } else {
+    const emailUser = process.env.EMAIL_USER || "registrations@uvend.co.za";
+    const emailPass = process.env.EMAIL_PASS;
+    const transporterConfig = {
+      host: process.env.SMTP_HOST || "smtp.uvend.co.za",
+      port: parseInt(process.env.SMTP_PORT || "587"),
+      secure: process.env.SMTP_SECURE === "true"
+    };
+    if (emailPass && emailPass.trim() !== "") {
+      transporterConfig.auth = {
+        user: emailUser,
+        pass: emailPass
+      };
+    }
+    return nodemailer.createTransport(transporterConfig);
+  }
+};
+const sendEmail = async (to, subject, html, text, attachments) => {
+  try {
+    const transporter = createTransporter();
+    const from = process.env.EMAIL_FROM || "noreply@uvend.co.za";
+    const recipients = Array.isArray(to) ? to : [to];
+    const mailOptions = {
+      from,
+      to: recipients,
+      subject,
+      text,
+      html,
+      attachments: attachments || []
+    };
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully:", info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("Error sending email:", error);
+    return { success: false, error: error.message };
+  }
+};
 const registration_post = defineEventHandler(async (event) => {
   var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
   try {
@@ -2223,7 +2274,9 @@ const registration_post = defineEventHandler(async (event) => {
       banking = {},
       address = {},
       meters = [],
-      documents = {}
+      documents = {},
+      pdfBase64
+      // PDF as base64 string from frontend
     } = body;
     if (!type || !personal.firstName || !personal.lastName || !personal.email) {
       throw createError({ statusCode: 400, statusMessage: "Missing required fields" });
@@ -2290,7 +2343,98 @@ const registration_post = defineEventHandler(async (event) => {
         })()
       }
     });
-    return { success: true, id: created.id };
+    const pdfAttachment = pdfBase64 ? [{
+      filename: `registration-summary-${personal.firstName}-${personal.lastName}-${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}.pdf`,
+      content: pdfBase64.split("base64,")[1] || pdfBase64,
+      // Remove data:application/pdf;base64, prefix if present
+      encoding: "base64"
+    }] : [];
+    const customerName = `${personal.firstName} ${personal.lastName}`;
+    const registrationType = type === "new" ? "New Registration" : type === "update" ? "Update Registration" : "Existing Customer Update";
+    const officeEmailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #1f2937;">New Registration Submission</h2>
+        <p>Hello,</p>
+        <p><strong>${customerName}</strong> has successfully registered with U-Vend.</p>
+        <p><strong>Registration Type:</strong> ${registrationType}</p>
+        <p><strong>Customer Details:</strong></p>
+        <ul>
+          <li><strong>Name:</strong> ${customerName}</li>
+          <li><strong>Email:</strong> ${personal.email}</li>
+          <li><strong>Phone:</strong> ${personal.phone || "Not provided"}</li>
+          <li><strong>ID Number:</strong> ${personal.idNumber || "Not provided"}</li>
+        </ul>
+        <p>Please find the complete registration details attached as a PDF. Please review and process this registration.</p>
+        <p>Submitted on: ${(/* @__PURE__ */ new Date()).toLocaleString("en-ZA", { timeZone: "Africa/Johannesburg" })}</p>
+        <p>Best regards,<br>U-Vend Registration System</p>
+      </div>
+    `;
+    const officeEmailText = `
+New Registration Submission
+
+${customerName} has successfully registered with U-Vend.
+
+Registration Type: ${registrationType}
+
+Customer Details:
+- Name: ${customerName}
+- Email: ${personal.email}
+- Phone: ${personal.phone || "Not provided"}
+- ID Number: ${personal.idNumber || "Not provided"}
+
+Please find the complete registration details attached as a PDF. Please review and process this registration.
+
+Submitted on: ${(/* @__PURE__ */ new Date()).toLocaleString("en-ZA", { timeZone: "Africa/Johannesburg" })}
+    `.trim();
+    const officeRecipients = [
+      "registrations@uvend.co.za",
+      "shawaal@uvend.co.za",
+      "Ross@uvend.co.za"
+    ];
+    await sendEmail(
+      officeRecipients,
+      `${customerName} - New Registration Submission`,
+      officeEmailHtml,
+      officeEmailText,
+      pdfAttachment
+    );
+    const customerEmailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #1f2937;">Registration Successful - U-Vend</h2>
+        <p>Dear ${customerName},</p>
+        <p>Thank you for registering with U-Vend! Your registration has been successfully submitted.</p>
+        <p>We have received your registration details and our team will review your submission. An agent will reach out to you shortly to complete the registration process.</p>
+        <p>If you have any questions or need assistance, please don't hesitate to contact us.</p>
+        <p>Best regards,<br>U-Vend Team</p>
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+        <p style="font-size: 12px; color: #6b7280;">This is an automated message. Please do not reply to this email.</p>
+      </div>
+    `;
+    const customerEmailText = `
+Registration Successful - U-Vend
+
+Dear ${customerName},
+
+Thank you for registering with U-Vend! Your registration has been successfully submitted.
+
+We have received your registration details and our team will review your submission. An agent will reach out to you shortly to complete the registration process.
+
+If you have any questions or need assistance, please don't hesitate to contact us.
+
+Best regards,
+U-Vend Team
+    `.trim();
+    await sendEmail(
+      personal.email,
+      "Registration Successful - U-Vend",
+      customerEmailHtml,
+      customerEmailText
+    );
+    return {
+      success: true,
+      id: created.id,
+      message: "Registration saved and emails sent successfully"
+    };
   } catch (error) {
     console.error("Registration save failed:", error);
     throw createError({ statusCode: 500, statusMessage: (error == null ? void 0 : error.message) || "Failed to save registration" });

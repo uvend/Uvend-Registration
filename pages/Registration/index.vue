@@ -1,5 +1,6 @@
 <template>
-    <div v-if="isRegistrationEnabled" class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div v-if="isRegistrationEnabled" class="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: url('/Background.jpg');">
+        <div class="min-h-screen bg-black/20 backdrop-blur-[1px]">
         <div class="max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-6 lg:py-8">
             <div class="flex items-center justify-center mb-6 md:mb-8">
                 <div class="flex items-center gap-3 md:gap-4">
@@ -71,8 +72,10 @@
                 </form>
             </div>
         </div>
+        </div>
     </div>
-    <div v-else class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+    <div v-else class="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: url('/Background.jpg');">
+        <div class="min-h-screen w-full bg-black/20 backdrop-blur-[1px] flex items-center justify-center">
         <div class="text-center px-4 bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border-0 max-w-md">
             <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Lock class="w-8 h-8 text-gray-400" />
@@ -83,6 +86,7 @@
                 <ArrowLeft class="w-4 h-4" />
                 Return to Home
             </NuxtLink>
+        </div>
         </div>
     </div>
 </template>
@@ -215,11 +219,18 @@ const handleSubmit = async () => {
 
         console.log('Registration saved:', res)
 
-        useToast({
+        // Use nuxtApp to access toast
+        const nuxtApp = useNuxtApp()
+        if (nuxtApp.$toast) {
+          nuxtApp.$toast({
             title: 'Success',
-            description: 'Your registration has been submitted successfully. We will send you a confirmation email shortly.',
+            description: 'Your registration has been submitted successfully! A confirmation email has been sent to your email address, and our team will reach out to you shortly.',
             variant: 'success'
-        })
+          })
+        } else {
+          // Fallback to alert if toast is not available
+          alert('Registration submitted successfully! A confirmation email has been sent to your email address.')
+        }
 
         await navigateTo('/')
     } catch (error) {
@@ -248,23 +259,47 @@ const handleDataChange = (data) => {
                 registrationStore.setType(data)
             }
             break
+        case 'personal':
         case 'personal-banking':
+            // Handle personal info (mobile: 'personal', desktop: 'personal-banking')
             if (isObject(data) && personalKeys.some(key => key in data)) {
                 if (hasChanged(registrationStore.formData.personal, data)) {
                     registrationStore.setPersonal(data)
                 }
-            } else if (isObject(data) && bankingKeys.some(key => key in data)) {
+            }
+            // For desktop 'personal-banking', also handle banking data
+            if (stepId === 'personal-banking' && isObject(data) && bankingKeys.some(key => key in data)) {
                 if (hasChanged(registrationStore.formData.banking, data)) {
                     registrationStore.setBanking(data)
                 }
             }
             break
+        case 'banking':
+            // Handle banking details (mobile only)
+            if (isObject(data) && bankingKeys.some(key => key in data)) {
+                if (hasChanged(registrationStore.formData.banking, data)) {
+                    registrationStore.setBanking(data)
+                }
+            }
+            break
+        case 'address':
         case 'address-meters':
+            // Handle address (mobile: 'address', desktop: 'address-meters')
             if (isObject(data) && addressKeys.some(key => key in data)) {
                 if (hasChanged(registrationStore.formData.address, data)) {
                     registrationStore.setAddress(data)
                 }
-            } else if (Array.isArray(data)) {
+            }
+            // For desktop 'address-meters', also handle meters data
+            if (stepId === 'address-meters' && Array.isArray(data)) {
+                if (hasChanged(registrationStore.formData.meters, data)) {
+                    registrationStore.setMeters(data)
+                }
+            }
+            break
+        case 'meters':
+            // Handle meters (mobile only)
+            if (Array.isArray(data)) {
                 if (hasChanged(registrationStore.formData.meters, data)) {
                     registrationStore.setMeters(data)
                 }

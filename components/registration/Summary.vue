@@ -420,25 +420,7 @@ const submitRegistration = async () => {
   isSubmitting.value = true
   
   try {
-    // First, save to database
-    const payload = {
-      type: props.registrationData.type,
-      personal: props.registrationData.personal,
-      banking: props.registrationData.banking,
-      address: props.registrationData.address,
-      meters: props.registrationData.meters || [],
-      documents: props.registrationData.documents || {}
-    }
-
-    console.log('Saving registration to database...', payload)
-    
-    const dbResponse = await $fetch('/api/registration', {
-      method: 'POST',
-      body: payload
-    })
-
-    console.log('Registration saved to database:', dbResponse)
-
+    // Generate PDF first
     const html2pdf = (await import('html2pdf.js')).default
     const pdfContent = await createPDFContent()
     
@@ -452,26 +434,36 @@ const submitRegistration = async () => {
     
     const pdfBlob = await html2pdf().from(pdfContent).set(options).outputPdf('blob')
     
-    // Create FormData for email
-    const formData = new FormData()
-    formData.append('to', 'registrations@uvend.co.za,shawaal@uvend.co.za,rross@uvend.co.za')
-    formData.append('subject', `New Registration Submission - ${props.registrationData.personal?.firstName} ${props.registrationData.personal?.lastName}`)
-    formData.append('body', createEmailBody())
-    formData.append('pdf', pdfBlob, `registration-summary-${new Date().toISOString().split('T')[0]}.pdf`)
-    
-    // Send email with PDF attachment
-    const emailResponse = await fetch('/api/send-email', {
-      method: 'POST',
-      body: formData
+    // Convert PDF blob to base64
+    const pdfBase64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result)
+      reader.onerror = reject
+      reader.readAsDataURL(pdfBlob)
     })
-    
-    if (emailResponse.ok) {
-      alert('Registration submitted successfully! You will receive a confirmation email shortly.')
-      // Emit event to parent to handle navigation/reset
-      emit('submit', dbResponse)
-    } else {
-      throw new Error('Failed to send email')
+
+    // Save to database and send emails (all handled by backend)
+    const payload = {
+      type: props.registrationData.type,
+      personal: props.registrationData.personal,
+      banking: props.registrationData.banking,
+      address: props.registrationData.address,
+      meters: props.registrationData.meters || [],
+      documents: props.registrationData.documents || {},
+      pdfBase64: pdfBase64 // Pass PDF as base64 to backend
     }
+
+    console.log('Submitting registration with PDF...')
+    
+    const response = await $fetch('/api/registration', {
+      method: 'POST',
+      body: payload
+    })
+
+    console.log('Registration submitted successfully:', response)
+    
+    // Emit event to parent to handle navigation/reset
+    emit('submit', response)
     
   } catch (error) {
     console.error('Error submitting registration:', error)
@@ -480,29 +472,6 @@ const submitRegistration = async () => {
   } finally {
     isSubmitting.value = false
   }
-}
-
-const createEmailBody = () => {
-  return `
-New registration submission received:
-
-Registration Type: ${getRegistrationTypeLabel(props.registrationData.type) || 'Not specified'}
-
-Personal Information:
-- Name: ${props.registrationData.personal?.firstName} ${props.registrationData.personal?.lastName}
-- Email: ${props.registrationData.personal?.email}
-- Phone: ${props.registrationData.personal?.phone}
-- ID Number: ${props.registrationData.personal?.idNumber}
-
-Banking Details:
-- Bank: ${props.registrationData.banking?.bankName}
-- Account Holder: ${props.registrationData.banking?.accountHolder}
-- Account Type: ${getAccountTypeLabel(props.registrationData.banking?.accountType)}
-
-Please see the attached PDF for complete details.
-
-Submitted on: ${new Date().toLocaleString()}
-  `.trim()
 }
 
 const fileToDataURL = (file) => {
@@ -610,9 +579,9 @@ const createPDFContent = async () => {
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
           <p><strong>Account Holder:</strong> ${props.registrationData.banking?.accountHolder || 'Not provided'}</p>
           <p><strong>Bank Name:</strong> ${props.registrationData.banking?.bankName || 'Not provided'}</p>
-          <p><strong>Account Type:</strong> ${getAccountTypeLabel(props.registrationData.banking?.accountType) || 'Not provided'}</p>
+          <p><strong>Account Type:</strong> ${props.registrationData.banking?.accountType ? getAccountTypeLabel(props.registrationData.banking.accountType) : 'Not provided'}</p>
           <p><strong>Branch Code:</strong> ${props.registrationData.banking?.branchCode || 'Not provided'}</p>
-          <p><strong>Account Number:</strong> ${maskAccountNumber(props.registrationData.banking?.accountNumber) || 'Not provided'}</p>
+          <p><strong>Account Number:</strong> ${props.registrationData.banking?.accountNumber || 'Not provided'}</p>
         </div>
       </div>
       

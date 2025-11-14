@@ -155,7 +155,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, nextTick } from 'vue'
 import Label from '~/components/ui/label.vue'
 import { Upload, FileCheck, AlertCircle } from 'lucide-vue-next'
 
@@ -176,7 +176,32 @@ const defaultDocumentState = () => ({
 
 const formData = ref(defaultDocumentState())
 const isSyncingFromProps = ref(false)
+const lastEmittedValue = ref<string>('')
 const manualErrors = ref({})
+
+// Helper to create a serializable representation of documents for comparison
+const serializeDocuments = (docs) => {
+  return JSON.stringify({
+    idDocument: docs.idDocument ? {
+      name: docs.idDocument.name,
+      size: docs.idDocument.size,
+      type: docs.idDocument.type,
+      lastModified: docs.idDocument.lastModified
+    } : null,
+    proofOfAddress: docs.proofOfAddress ? {
+      name: docs.proofOfAddress.name,
+      size: docs.proofOfAddress.size,
+      type: docs.proofOfAddress.type,
+      lastModified: docs.proofOfAddress.lastModified
+    } : null,
+    bankStatement: docs.bankStatement ? {
+      name: docs.bankStatement.name,
+      size: docs.bankStatement.size,
+      type: docs.bankStatement.type,
+      lastModified: docs.bankStatement.lastModified
+    } : null
+  })
+}
 
 // Initialize form data from props if available
 watch(() => props.registrationData?.documents, (newValue) => {
@@ -184,12 +209,24 @@ watch(() => props.registrationData?.documents, (newValue) => {
     return
   }
 
-  isSyncingFromProps.value = true
-  formData.value = {
+  const synced = {
     ...defaultDocumentState(),
     ...newValue
   }
-  isSyncingFromProps.value = false
+
+  // Compare using serialized metadata since File objects can't be directly compared
+  const currentSerialized = serializeDocuments(formData.value)
+  const syncedSerialized = serializeDocuments(synced)
+
+  // Only update if actually different
+  if (currentSerialized !== syncedSerialized) {
+    isSyncingFromProps.value = true
+    formData.value = synced
+    nextTick(() => {
+      isSyncingFromProps.value = false
+      lastEmittedValue.value = serializeDocuments(formData.value)
+    })
+  }
 }, { immediate: true, deep: true })
 
 const validateFile = (file) => {
@@ -368,18 +405,50 @@ const errors = computed(() => {
   }
 })
 
+// Helper to create a serializable representation of documents for comparison
+const serializeDocuments = (docs) => {
+  return JSON.stringify({
+    idDocument: docs.idDocument ? {
+      name: docs.idDocument.name,
+      size: docs.idDocument.size,
+      type: docs.idDocument.type,
+      lastModified: docs.idDocument.lastModified
+    } : null,
+    proofOfAddress: docs.proofOfAddress ? {
+      name: docs.proofOfAddress.name,
+      size: docs.proofOfAddress.size,
+      type: docs.proofOfAddress.type,
+      lastModified: docs.proofOfAddress.lastModified
+    } : null,
+    bankStatement: docs.bankStatement ? {
+      name: docs.bankStatement.name,
+      size: docs.bankStatement.size,
+      type: docs.bankStatement.type,
+      lastModified: docs.bankStatement.lastModified
+    } : null
+  })
+}
+
 const emitDocuments = () => {
   if (isSyncingFromProps.value) {
     return
   }
 
-  emit('dataChange', {
+  const payload = {
     documents: {
       idDocument: formData.value.idDocument,
       proofOfAddress: formData.value.proofOfAddress,
       bankStatement: formData.value.bankStatement
     }
-  })
+  }
+  
+  const payloadStr = serializeDocuments(formData.value)
+  
+  // Only emit if the payload has actually changed
+  if (payloadStr !== lastEmittedValue.value) {
+    lastEmittedValue.value = payloadStr
+    emit('dataChange', payload)
+  }
 }
 
 // Emit whenever the form data changes

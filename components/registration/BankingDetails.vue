@@ -196,7 +196,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, reactive } from 'vue'
+import { ref, watch, reactive, nextTick } from 'vue'
 import Label from '../ui/label.vue'
 import Input from '../ui/input.vue'
 import { AlertCircle, CheckCircle, CreditCard } from 'lucide-vue-next'
@@ -232,6 +232,7 @@ const defaultBankingState = (): BankingFormState => ({
 
 const formData = ref<BankingFormState>(defaultBankingState())
 const isSyncingFromProps = ref(false)
+const lastEmittedValue = ref<string>('')
 const errors = reactive<Record<keyof BankingFormState, string>>({
   accountHolder: '',
   bankName: '',
@@ -248,6 +249,26 @@ const touched = reactive<BankingTouchedState>({
 })
 
 const REQUIRED_MESSAGE = '* field must be filled'
+
+const deepEqual = (a: any, b: any): boolean => {
+  if (a === b) return true
+  if (!a || !b) return false
+  if (typeof a !== 'object' || typeof b !== 'object') return false
+  
+  const keysA = Object.keys(a)
+  const keysB = Object.keys(b)
+  if (keysA.length !== keysB.length) return false
+  
+  for (const key of keysA) {
+    if (!keysB.includes(key)) return false
+    if (a[key] !== b[key] && typeof a[key] === 'object' && typeof b[key] === 'object') {
+      if (!deepEqual(a[key], b[key])) return false
+    } else if (a[key] !== b[key]) {
+      return false
+    }
+  }
+  return true
+}
 
 const resetTouched = () => {
   Object.keys(touched).forEach((key) => {
@@ -279,15 +300,22 @@ const accountTypeOptions = [
 watch(() => props.registrationData?.banking, (newValue) => {
   if (!newValue) return
 
-  isSyncingFromProps.value = true
   const synced = {
     ...defaultBankingState(),
     ...JSON.parse(JSON.stringify(newValue))
   }
   if (!synced.accountType) synced.accountType = ''
-  formData.value = synced
-  resetTouched()
-  isSyncingFromProps.value = false
+
+  // Only update if actually different
+  if (!deepEqual(formData.value, synced)) {
+    isSyncingFromProps.value = true
+    formData.value = synced
+    resetTouched()
+    nextTick(() => {
+      isSyncingFromProps.value = false
+      lastEmittedValue.value = JSON.stringify(formData.value)
+    })
+  }
 }, { immediate: true, deep: true })
 
 const formatAccountNumber = (event: Event) => {
@@ -341,7 +369,13 @@ watch(formData, (newValue) => {
     ...JSON.parse(JSON.stringify(newValue)),
     accountType: newValue.accountType || ''
   }
-  emit('dataChange', payload)
+  const payloadStr = JSON.stringify(payload)
+  
+  // Only emit if the payload has actually changed
+  if (payloadStr !== lastEmittedValue.value) {
+    lastEmittedValue.value = payloadStr
+    emit('dataChange', payload)
+  }
 }, { deep: true, immediate: false })
 
 defineExpose({

@@ -29,9 +29,6 @@ RUN npm ci --omit=dev --ignore-scripts
 
 FROM node:20-slim AS runner
 
-ENV NODE_ENV=production \
-    NITRO_PORT=3000 \
-    NITRO_HOST=0.0.0.0
 
 WORKDIR /app
 
