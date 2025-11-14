@@ -213,18 +213,9 @@ const touched = reactive<PersonalTouchedState>({
 
 const REQUIRED_MESSAGE = '* field must be filled'
 
-const debugValidation = (field: string, value: unknown, error: string) => {
-  console.debug('[PersonalInfo] validate', {
-    field,
-    value,
-    error,
-    touched: touched[field as keyof typeof touched]
-  })
-}
-
 const resetTouched = () => {
-  ;(Object.keys(touched) as Array<keyof PersonalTouchedState>).forEach((key) => {
-    touched[key] = false
+  Object.keys(touched).forEach(key => {
+    touched[key as keyof PersonalTouchedState] = false
   })
 }
 
@@ -233,16 +224,10 @@ const markTouched = (field: keyof PersonalTouchedState) => {
 }
 
 const isFieldValid = (field: keyof PersonalFormState) => {
-  const value = formData.value[field]
-  return Boolean(
-    touched[field] &&
-      !errors[field] &&
-      value &&
-      value.toString().trim().length > 0
-  )
+  const val = formData.value[field]
+  return touched[field] && !errors[field] && val && val.toString().trim().length > 0
 }
 
-// Helper to compare two objects deeply
 const deepEqual = (a: any, b: any): boolean => {
   if (a === b) return true
   if (!a || !b) return false
@@ -263,30 +248,23 @@ const deepEqual = (a: any, b: any): boolean => {
   return true
 }
 
-// Store last emitted value to prevent duplicate emissions
-const lastEmittedValue = ref<string>('')
+const lastEmitted = ref('')
 
-// Initialize / sync form data from props if available
 watch(() => props.registrationData?.personal, (newValue) => {
-  if (!newValue) {
-    return
-  }
+  if (!newValue) return
 
   const synced = {
     ...defaultPersonalState(),
     ...JSON.parse(JSON.stringify(newValue))
   }
 
-  // Only update if actually different
   if (!deepEqual(formData.value, synced)) {
     isSyncingFromProps.value = true
     formData.value = synced
     resetTouched()
-    // Use nextTick to ensure sync is complete before allowing emissions
     nextTick(() => {
       isSyncingFromProps.value = false
-      // Update last emitted to prevent immediate re-emission
-      lastEmittedValue.value = JSON.stringify(formData.value)
+      lastEmitted.value = JSON.stringify(formData.value)
     })
   }
 }, { immediate: true, deep: true })
@@ -300,60 +278,49 @@ const validateRequired = (value: string | null | undefined) => {
 
 watch(() => formData.value.firstName, (val) => {
   errors.firstName = validateRequired(val)
-  debugValidation('firstName', val, errors.firstName)
 }, { immediate: true })
 
 watch(() => formData.value.lastName, (val) => {
   errors.lastName = validateRequired(val)
-  debugValidation('lastName', val, errors.lastName)
 }, { immediate: true })
 
 watch(() => formData.value.email, (val) => {
   errors.email = validateRequired(val)
-  debugValidation('email', val, errors.email)
 }, { immediate: true })
 
 watch(() => formData.value.phone, (val) => {
   errors.phone = validateRequired(val)
-  debugValidation('phone', val, errors.phone)
 }, { immediate: true })
 
 watch(() => formData.value.idNumber, (val) => {
   errors.idNumber = validateRequired(val)
-  debugValidation('idNumber', val, errors.idNumber)
 }, { immediate: true })
 
 watch(() => formData.value.dateOfBirth, (val) => {
   errors.dateOfBirth = validateRequired(val)
-  debugValidation('dateOfBirth', val, errors.dateOfBirth)
 }, { immediate: true })
 
-// Emit whenever the form changes (skip when syncing from props)
 watch(formData, (newValue) => {
-  if (isSyncingFromProps.value) {
-    return
-  }
+  if (isSyncingFromProps.value) return
 
   const payload = JSON.parse(JSON.stringify(newValue))
-  const payloadString = JSON.stringify(payload)
+  const payloadStr = JSON.stringify(payload)
   
-  // Only emit if the data actually changed
-  if (payloadString !== lastEmittedValue.value) {
-    lastEmittedValue.value = payloadString
+  if (payloadStr !== lastEmitted.value) {
+    lastEmitted.value = payloadStr
     emit('dataChange', payload)
   }
 }, { deep: true, immediate: false })
 
-// Expose form data to parent
 defineExpose({
-  validate: () => Object.values(errors).every((message) => message === ''),
+  validate: () => Object.values(errors).every(msg => msg === ''),
   getData: () => formData.value,
   submit: () => {
-    ;(Object.keys(touched) as Array<keyof PersonalTouchedState>).forEach((key) => {
-      touched[key] = true
+    Object.keys(touched).forEach(key => {
+      touched[key as keyof PersonalTouchedState] = true
     })
     emit('dataChange', JSON.parse(JSON.stringify(formData.value)))
-    return Object.values(errors).every((message) => message === '')
+    return Object.values(errors).every(msg => msg === '')
   },
   errors,
   touched,

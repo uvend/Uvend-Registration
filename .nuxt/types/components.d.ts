@@ -22,12 +22,6 @@ interface _GlobalComponents {
   'RegistrationPersonalInfo': typeof import("../../components/registration/PersonalInfo.vue")['default']
   'RegistrationType': typeof import("../../components/registration/RegistrationType.vue")['default']
   'RegistrationSummary': typeof import("../../components/registration/Summary.vue")['default']
-  'UiSelectContent': typeof import("../../components/ui/SelectContent.vue")['default']
-  'UiSelectGroup': typeof import("../../components/ui/SelectGroup.vue")['default']
-  'UiSelectItem': typeof import("../../components/ui/SelectItem.vue")['default']
-  'UiSelectLabel': typeof import("../../components/ui/SelectLabel.vue")['default']
-  'UiSelectTrigger': typeof import("../../components/ui/SelectTrigger.vue")['default']
-  'UiSelectValue': typeof import("../../components/ui/SelectValue.vue")['default']
   'UiButton': typeof import("../../components/ui/button.vue")['default']
   'UiCheckbox': typeof import("../../components/ui/checkbox.vue")['default']
   'UiInput': typeof import("../../components/ui/input.vue")['default']
@@ -64,12 +58,6 @@ interface _GlobalComponents {
   'LazyRegistrationPersonalInfo': LazyComponent<typeof import("../../components/registration/PersonalInfo.vue")['default']>
   'LazyRegistrationType': LazyComponent<typeof import("../../components/registration/RegistrationType.vue")['default']>
   'LazyRegistrationSummary': LazyComponent<typeof import("../../components/registration/Summary.vue")['default']>
-  'LazyUiSelectContent': LazyComponent<typeof import("../../components/ui/SelectContent.vue")['default']>
-  'LazyUiSelectGroup': LazyComponent<typeof import("../../components/ui/SelectGroup.vue")['default']>
-  'LazyUiSelectItem': LazyComponent<typeof import("../../components/ui/SelectItem.vue")['default']>
-  'LazyUiSelectLabel': LazyComponent<typeof import("../../components/ui/SelectLabel.vue")['default']>
-  'LazyUiSelectTrigger': LazyComponent<typeof import("../../components/ui/SelectTrigger.vue")['default']>
-  'LazyUiSelectValue': LazyComponent<typeof import("../../components/ui/SelectValue.vue")['default']>
   'LazyUiButton': LazyComponent<typeof import("../../components/ui/button.vue")['default']>
   'LazyUiCheckbox': LazyComponent<typeof import("../../components/ui/checkbox.vue")['default']>
   'LazyUiInput': LazyComponent<typeof import("../../components/ui/input.vue")['default']>

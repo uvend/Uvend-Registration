@@ -11,27 +11,6 @@
         </div>
       </div>
 
-      <div class="bg-white/80 backdrop-blur-sm rounded-xl border-0 p-6 space-y-6 shadow-lg">
-        <div class="space-y-2">
-          <Label for="addressSearch" class="flex items-center justify-between">
-            <span>Search Address</span>
-            <span v-if="hasPlacesApiKey" class="text-xs text-gray-500">Powered by Google Places</span>
-          </Label>
-          <input
-            id="addressSearch"
-            ref="addressSearchInput"
-            type="text"
-            :disabled="!hasPlacesApiKey"
-            placeholder="Start typing to search your address"
-            autocomplete="off"
-            class="w-full bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-gray-100"
-          />
-          <p class="text-xs text-gray-500">
-            {{ hasPlacesApiKey ? 'Selecting a result will auto-fill the fields below. You can still adjust them manually.' : 'Set NUXT_PUBLIC_GOOGLE_MAPS_API_KEY to enable address autocomplete.' }}
-          </p>
-        </div>
-      </div>
-
       <!-- Main Address -->
       <div class="bg-white/80 backdrop-blur-sm rounded-xl border-0 p-6 space-y-6 shadow-lg">
         <h3 class="text-lg font-medium text-gray-900">Main Business Address</h3>
@@ -352,14 +331,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, computed, reactive } from 'vue'
 import Label from '../ui/label.vue'
 import Input from '../ui/input.vue'
 import Button from '../ui/button.vue'
 import { AlertCircle, CheckCircle, PlusIcon, TrashIcon, MapPin } from 'lucide-vue-next'
-import { Loader } from '@googlemaps/js-api-loader'
-
-declare const useRuntimeConfig: () => { public: { googleMapsApiKey?: string } }
 
 const props = defineProps({
   registrationData: {
@@ -415,9 +391,6 @@ const touched = reactive<AddressTouchedState>({
   postalCode: false
 })
 const complexTouched = ref<ComplexTouchedState[]>([])
-const addressSearchInput = ref<HTMLInputElement | null>(null)
-const runtimeConfig = useRuntimeConfig()
-const hasPlacesApiKey = computed(() => Boolean(runtimeConfig.public.googleMapsApiKey))
 
 const REQUIRED_MESSAGE = '* field must be filled'
 
@@ -489,9 +462,6 @@ const isComplexFieldValid = (index: number, field: ComplexFieldKey) => {
       stringValue.toString().trim().length > 0
   )
 }
-
-let autocomplete: any = null
-let placeChangedListener: { remove(): void } | null = null
 
 // Initialize / sync form data from props if available
 watch(() => props.registrationData?.address, (newValue) => {
@@ -591,78 +561,6 @@ const errors = computed<Record<string, string>>(() => {
   return newErrors
 })
 
-const setupAutocomplete = async () => {
-  if (!hasPlacesApiKey.value || !process.client) {
-    return
-  }
-
-  try {
-    const loader = new Loader({
-      apiKey: runtimeConfig.public.googleMapsApiKey ?? '',
-      libraries: ['places']
-    })
-
-    const googleMaps = await loader.load()
-
-    if (!addressSearchInput.value) {
-      return
-    }
-
-    autocomplete = new googleMaps.maps.places.Autocomplete(addressSearchInput.value, {
-      fields: ['address_components', 'formatted_address'],
-      componentRestrictions: { country: 'ZA' }
-    })
-
-    placeChangedListener = autocomplete.addListener('place_changed', () => {
-      const place = autocomplete?.getPlace()
-      if (!place || !place.address_components) {
-        return
-      }
-
-      const components = place.address_components as Array<{ long_name: string; types: string[] }>
-      const getComponent = (type: string) => {
-        const match = components.find(
-          (component: { long_name: string; types: string[] }) => component.types.includes(type)
-        )
-        return match ? match.long_name : ''
-      }
-
-      const streetNumber = getComponent('street_number')
-      const route = getComponent('route')
-      const suburb =
-        getComponent('sublocality_level_1') ||
-        getComponent('neighborhood') ||
-        getComponent('sublocality') ||
-        ''
-      const city = getComponent('locality') || getComponent('administrative_area_level_2') || ''
-      const province = getComponent('administrative_area_level_1') || ''
-      const postalCode = getComponent('postal_code') || ''
-      const combinedStreet = [streetNumber, route].filter(Boolean).join(' ').trim()
-
-      formData.value = {
-        ...formData.value,
-        streetAddress: combinedStreet || formData.value.streetAddress,
-        suburb: suburb || formData.value.suburb,
-        city: city || formData.value.city,
-        province: province || formData.value.province,
-        postalCode: postalCode || formData.value.postalCode
-      }
-
-      markTouched('streetAddress')
-      markTouched('suburb')
-      markTouched('city')
-      markTouched('province')
-      markTouched('postalCode')
-
-      if (addressSearchInput.value) {
-        addressSearchInput.value.value = place.formatted_address ?? ''
-      }
-    })
-  } catch (error) {
-    console.error('Failed to initialise Google Places Autocomplete:', error)
-  }
-}
-
 // Emit whenever the form changes (skip when syncing from props)
 watch(formData, (newValue) => {
   if (isSyncingFromProps.value) {
@@ -671,17 +569,6 @@ watch(formData, (newValue) => {
 
   emit('dataChange', JSON.parse(JSON.stringify(newValue)))
 }, { deep: true, immediate: false })
-
-onMounted(() => {
-  setupAutocomplete()
-})
-
-onBeforeUnmount(() => {
-  if (placeChangedListener) {
-    placeChangedListener.remove()
-    placeChangedListener = null
-  }
-})
 
 // Expose form data to parent
 defineExpose({

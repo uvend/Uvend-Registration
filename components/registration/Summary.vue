@@ -395,22 +395,17 @@ const generatePDF = async () => {
   isGeneratingPDF.value = true
   
   try {
-    // Import html2pdf dynamically
     const html2pdf = (await import('html2pdf.js')).default
+    const pdfContent = await createPDFContent()
     
-    // Create PDF content
-    const pdfContent = createPDFContent()
-    
-    // Configure PDF options
     const options = {
       margin: [10, 10, 10, 10],
       filename: `registration-summary-${new Date().toISOString().split('T')[0]}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     }
     
-    // Generate PDF
     await html2pdf().from(pdfContent).set(options).save()
     
   } catch (error) {
@@ -444,23 +439,17 @@ const submitRegistration = async () => {
 
     console.log('Registration saved to database:', dbResponse)
 
-    // Then generate PDF and send email
-    // Import html2pdf dynamically
     const html2pdf = (await import('html2pdf.js')).default
+    const pdfContent = await createPDFContent()
     
-    // Create PDF content
-    const pdfContent = createPDFContent()
-    
-    // Configure PDF options
     const options = {
       margin: [10, 10, 10, 10],
       filename: `registration-summary-${new Date().toISOString().split('T')[0]}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     }
     
-    // Generate PDF blob
     const pdfBlob = await html2pdf().from(pdfContent).set(options).outputPdf('blob')
     
     // Create FormData for email
@@ -516,8 +505,56 @@ Submitted on: ${new Date().toLocaleString()}
   `.trim()
 }
 
-const createPDFContent = () => {
+const fileToDataURL = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
+const pdfToImage = async (pdfFile) => {
+  try {
+    const pdfjsLib = await import('pdfjs-dist')
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
+    
+    const arrayBuffer = await pdfFile.arrayBuffer()
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+    const page = await pdf.getPage(1)
+    
+    const viewport = page.getViewport({ scale: 2.0 })
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')
+    canvas.height = viewport.height
+    canvas.width = viewport.width
+    
+    await page.render({ canvasContext: context, viewport }).promise
+    return canvas.toDataURL('image/jpeg', 0.95)
+  } catch (error) {
+    console.error('Error converting PDF to image:', error)
+    return null
+  }
+}
+
+const getDocumentImage = async (file) => {
+  if (!file) return null
+  
+  if (file.type?.startsWith('image/')) {
+    return await fileToDataURL(file)
+  } else if (file.type === 'application/pdf') {
+    return await pdfToImage(file)
+  }
+  return null
+}
+
+const createPDFContent = async () => {
   const content = document.createElement('div')
+  
+  const idDocImage = await getDocumentImage(props.registrationData.documents?.idDocument)
+  const proofImage = await getDocumentImage(props.registrationData.documents?.proofOfAddress)
+  const bankImage = await getDocumentImage(props.registrationData.documents?.bankStatement)
+  
   content.innerHTML = `
     <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #3b82f6; padding-bottom: 20px;">
@@ -545,11 +582,26 @@ const createPDFContent = () => {
       <div style="margin-bottom: 25px;">
         <h2 style="color: #1e40af; font-size: 20px; margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px;">Documents</h2>
         ${hasDocuments.value ? `
-          <ul style="margin: 0; padding-left: 20px;">
-            ${props.registrationData.documents?.idDocument ? `<li>ID Document: ${props.registrationData.documents.idDocument.name}</li>` : ''}
-            ${props.registrationData.documents?.proofOfAddress ? `<li>Proof of Address: ${props.registrationData.documents.proofOfAddress.name}</li>` : ''}
-            ${props.registrationData.documents?.bankStatement ? `<li>Bank Statement: ${props.registrationData.documents.bankStatement.name}</li>` : ''}
-          </ul>
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            ${props.registrationData.documents?.idDocument ? `
+              <div style="border: 1px solid #e5e7eb; padding: 15px; background-color: #f9fafb;">
+                <h3 style="color: #374151; font-size: 16px; margin-bottom: 10px;">ID Document: ${props.registrationData.documents.idDocument.name}</h3>
+                ${idDocImage ? `<img src="${idDocImage}" style="max-width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 4px;" />` : '<p style="color: #6b7280;">Document preview unavailable</p>'}
+              </div>
+            ` : ''}
+            ${props.registrationData.documents?.proofOfAddress ? `
+              <div style="border: 1px solid #e5e7eb; padding: 15px; background-color: #f9fafb;">
+                <h3 style="color: #374151; font-size: 16px; margin-bottom: 10px;">Proof of Address: ${props.registrationData.documents.proofOfAddress.name}</h3>
+                ${proofImage ? `<img src="${proofImage}" style="max-width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 4px;" />` : '<p style="color: #6b7280;">Document preview unavailable</p>'}
+              </div>
+            ` : ''}
+            ${props.registrationData.documents?.bankStatement ? `
+              <div style="border: 1px solid #e5e7eb; padding: 15px; background-color: #f9fafb;">
+                <h3 style="color: #374151; font-size: 16px; margin-bottom: 10px;">Bank Statement: ${props.registrationData.documents.bankStatement.name}</h3>
+                ${bankImage ? `<img src="${bankImage}" style="max-width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 4px;" />` : '<p style="color: #6b7280;">Document preview unavailable</p>'}
+              </div>
+            ` : ''}
+          </div>
         ` : '<p>No documents uploaded</p>'}
       </div>
       

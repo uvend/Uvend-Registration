@@ -51,7 +51,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['dataChange'])
+const emit = defineEmits(['dataChange', 'next'])
 
 const registrationTypes = [
   {
@@ -73,7 +73,6 @@ const registrationTypes = [
 
 const selectedType = ref('')
 
-// Initialize from props if available
 watch(() => props.registrationData?.type, (newValue) => {
   if (newValue) {
     selectedType.value = newValue
@@ -83,6 +82,10 @@ watch(() => props.registrationData?.type, (newValue) => {
 const selectType = (type) => {
   selectedType.value = type
   emit('dataChange', { type: selectedType.value })
+  
+  setTimeout(() => {
+    emit('next')
+  }, 300)
 }
 
 // Expose component data

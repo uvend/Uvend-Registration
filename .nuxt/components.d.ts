@@ -22,12 +22,6 @@ export const RegistrationNavigationButtons: typeof import("../components/registr
 export const RegistrationPersonalInfo: typeof import("../components/registration/PersonalInfo.vue")['default']
 export const RegistrationType: typeof import("../components/registration/RegistrationType.vue")['default']
 export const RegistrationSummary: typeof import("../components/registration/Summary.vue")['default']
-export const UiSelectContent: typeof import("../components/ui/SelectContent.vue")['default']
-export const UiSelectGroup: typeof import("../components/ui/SelectGroup.vue")['default']
-export const UiSelectItem: typeof import("../components/ui/SelectItem.vue")['default']
-export const UiSelectLabel: typeof import("../components/ui/SelectLabel.vue")['default']
-export const UiSelectTrigger: typeof import("../components/ui/SelectTrigger.vue")['default']
-export const UiSelectValue: typeof import("../components/ui/SelectValue.vue")['default']
 export const UiButton: typeof import("../components/ui/button.vue")['default']
 export const UiCheckbox: typeof import("../components/ui/checkbox.vue")['default']
 export const UiInput: typeof import("../components/ui/input.vue")['default']
@@ -64,12 +58,6 @@ export const LazyRegistrationNavigationButtons: LazyComponent<typeof import("../
 export const LazyRegistrationPersonalInfo: LazyComponent<typeof import("../components/registration/PersonalInfo.vue")['default']>
 export const LazyRegistrationType: LazyComponent<typeof import("../components/registration/RegistrationType.vue")['default']>
 export const LazyRegistrationSummary: LazyComponent<typeof import("../components/registration/Summary.vue")['default']>
-export const LazyUiSelectContent: LazyComponent<typeof import("../components/ui/SelectContent.vue")['default']>
-export const LazyUiSelectGroup: LazyComponent<typeof import("../components/ui/SelectGroup.vue")['default']>
-export const LazyUiSelectItem: LazyComponent<typeof import("../components/ui/SelectItem.vue")['default']>
-export const LazyUiSelectLabel: LazyComponent<typeof import("../components/ui/SelectLabel.vue")['default']>
-export const LazyUiSelectTrigger: LazyComponent<typeof import("../components/ui/SelectTrigger.vue")['default']>
-export const LazyUiSelectValue: LazyComponent<typeof import("../components/ui/SelectValue.vue")['default']>
 export const LazyUiButton: LazyComponent<typeof import("../components/ui/button.vue")['default']>
 export const LazyUiCheckbox: LazyComponent<typeof import("../components/ui/checkbox.vue")['default']>
 export const LazyUiInput: LazyComponent<typeof import("../components/ui/input.vue")['default']>

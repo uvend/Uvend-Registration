@@ -249,26 +249,15 @@ const touched = reactive<BankingTouchedState>({
 
 const REQUIRED_MESSAGE = '* field must be filled'
 
-const debugValidation = (field: string, value: unknown, error: string) => {
-  console.debug('[BankingDetails] validate', {
-    field,
-    value,
-    error,
-    touched: touched[field as keyof typeof touched]
-  })
-}
-
 const resetTouched = () => {
-  ;(Object.keys(touched) as Array<keyof BankingTouchedState>).forEach((key) => {
-    touched[key] = false
+  Object.keys(touched).forEach((key) => {
+    touched[key as keyof BankingTouchedState] = false
   })
 }
 
 const markTouched = (field: keyof BankingTouchedState) => {
   touched[field] = true
-  // Trigger validation immediately when field is touched
-  const value = formData.value[field]
-  errors[field] = validateRequired(value)
+  errors[field] = validateRequired(formData.value[field])
 }
 
 const isFieldValid = (field: keyof BankingFormState) => {
@@ -281,51 +270,39 @@ const isFieldValid = (field: keyof BankingFormState) => {
   )
 }
 
-const accountTypeOptions: Array<{ value: string; label: string }> = [
+const accountTypeOptions = [
   { value: 'savings', label: 'Savings' },
   { value: 'current', label: 'Current/Cheque' },
   { value: 'transmission', label: 'Transmission' }
 ]
 
-// Initialize form data from props if available
 watch(() => props.registrationData?.banking, (newValue) => {
-  if (!newValue) {
-    return
-  }
+  if (!newValue) return
 
   isSyncingFromProps.value = true
-
   const synced = {
     ...defaultBankingState(),
     ...JSON.parse(JSON.stringify(newValue))
   }
-
-  if (!synced.accountType) {
-    synced.accountType = ''
-  }
-
+  if (!synced.accountType) synced.accountType = ''
   formData.value = synced
   resetTouched()
   isSyncingFromProps.value = false
 }, { immediate: true, deep: true })
 
-// Format account number to only allow numbers
 const formatAccountNumber = (event: Event) => {
-  const target = event.target as HTMLInputElement | null
-  const formatted = target?.value.replace(/\D/g, '').slice(0, 16) ?? ''
+  const target = event.target as HTMLInputElement
+  const formatted = target?.value.replace(/\D/g, '').slice(0, 16) || ''
   formData.value.accountNumber = formatted
   markTouched('accountNumber')
-  // Force validation update
   errors.accountNumber = validateRequired(formatted)
 }
 
-// Format branch code to only allow numbers
 const formatBranchCode = (event: Event) => {
-  const target = event.target as HTMLInputElement | null
-  const formatted = target?.value.replace(/\D/g, '').slice(0, 6) ?? ''
+  const target = event.target as HTMLInputElement
+  const formatted = target?.value.replace(/\D/g, '').slice(0, 6) || ''
   formData.value.branchCode = formatted
   markTouched('branchCode')
-  // Force validation update
   errors.branchCode = validateRequired(formatted)
 }
 
@@ -339,53 +316,43 @@ const validateRequired = (value: string | null | undefined) => {
 
 watch(() => formData.value.accountHolder, (val) => {
   errors.accountHolder = validateRequired(val)
-  debugValidation('accountHolder', val, errors.accountHolder)
 }, { immediate: true })
 
 watch(() => formData.value.bankName, (val) => {
   errors.bankName = validateRequired(val)
-  debugValidation('bankName', val, errors.bankName)
 }, { immediate: true })
 
 watch(() => formData.value.accountNumber, (val) => {
   errors.accountNumber = validateRequired(val)
-  debugValidation('accountNumber', val, errors.accountNumber)
 }, { immediate: true })
 
 watch(() => formData.value.accountType, (val) => {
   errors.accountType = validateRequired(val)
-  debugValidation('accountType', val, errors.accountType)
 }, { immediate: true })
 
 watch(() => formData.value.branchCode, (val) => {
   errors.branchCode = validateRequired(val)
-  debugValidation('branchCode', val, errors.branchCode)
 }, { immediate: true })
 
-// Emit whenever the form changes (skip when syncing from props)
 watch(formData, (newValue) => {
-  if (isSyncingFromProps.value) {
-    return
-  }
+  if (isSyncingFromProps.value) return
 
   const payload = {
     ...JSON.parse(JSON.stringify(newValue)),
-    accountType: newValue.accountType ?? ''
+    accountType: newValue.accountType || ''
   }
-
   emit('dataChange', payload)
 }, { deep: true, immediate: false })
 
-// Expose form data to parent
 defineExpose({
-  validate: () => Object.values(errors).every((message) => message === ''),
+  validate: () => Object.values(errors).every(msg => msg === ''),
   getData: () => formData.value,
   submit: () => {
-    ;(Object.keys(touched) as Array<keyof BankingTouchedState>).forEach((key) => {
-      touched[key] = true
+    Object.keys(touched).forEach(key => {
+      touched[key as keyof BankingTouchedState] = true
     })
     emit('dataChange', { ...formData.value })
-    return Object.values(errors).every((message) => message === '')
+    return Object.values(errors).every(msg => msg === '')
   },
   errors,
   touched,

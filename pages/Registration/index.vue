@@ -1,7 +1,6 @@
 <template>
     <div v-if="isRegistrationEnabled" class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         <div class="max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-6 lg:py-8">
-            <!-- Logo Header -->
             <div class="flex items-center justify-center mb-6 md:mb-8">
                 <div class="flex items-center gap-3 md:gap-4">
                     <div class="flex items-center gap-2 md:gap-3">
@@ -17,14 +16,9 @@
                 </div>
             </div>
 
-            <!-- Form Container -->
             <div class="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border-0 mb-12">
                 <form id="registrationForm" @submit.prevent="handleStepComplete" novalidate>
-                    <!-- Card Logo Header -->
-               
-
                     <div class="p-6 lg:p-8 pt-4 lg:pt-6 overflow-y-auto max-h-[calc(100vh-220px)] md:max-h-[calc(100vh-260px)] scroll-area">
-                        <!-- Render paired steps on large screens for steps 2 and 3 -->
                         <div v-if="pairedComponent" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div>
                                 <KeepAlive>
@@ -45,11 +39,11 @@
                                         :key="'pair-' + effectiveSteps[currentStep - 1].id"
                                         :registration-data="formData"
                                         @data-change="handleDataChange"
+                                        @next="handleStepComplete"
                                     />
                                 </KeepAlive>
                             </div>
                         </div>
-                        <!-- Render single step for type, documents, and summary (or on mobile) -->
                         <div v-else>
                             <KeepAlive>
                                 <component
@@ -59,6 +53,7 @@
                                     v-model:type="formData.type"
                                     :registration-data="formData"
                                     @data-change="handleDataChange"
+                                    @next="handleStepComplete"
                                 />
                             </KeepAlive>
                         </div>
@@ -93,7 +88,7 @@
 </template>
 
 <script setup>
-import { ref, computed, markRaw, getCurrentInstance, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, markRaw, watch, onMounted, onBeforeUnmount } from 'vue'
 import { Lock, ArrowLeft } from 'lucide-vue-next'
 import RegistrationType from '~/components/registration/RegistrationType.vue'
 import PersonalInfo from '~/components/registration/PersonalInfo.vue'
@@ -242,25 +237,18 @@ const bankingKeys = ['accountHolder', 'bankName', 'accountNumber', 'accountType'
 const addressKeys = ['streetAddress', 'suburb', 'city', 'province', 'postalCode', 'complexes']
 
 const handleDataChange = (data) => {
-    // Store the data based on current step
     const stepId = effectiveSteps.value[currentStep.value - 1]?.id
-    
     if (!stepId) return
     
-    // Handle the new step structure
     switch (stepId) {
         case 'type':
-            if (isObject(data)) {
-                if (typeof data.type === 'string' && registrationStore.formData.type !== data.type) {
-                    registrationStore.setType(data.type)
-                }
+            if (isObject(data) && typeof data.type === 'string' && registrationStore.formData.type !== data.type) {
+                registrationStore.setType(data.type)
             } else if (typeof data === 'string' && registrationStore.formData.type !== data) {
                 registrationStore.setType(data)
             }
             break
         case 'personal-banking':
-            // Determine which component emitted based on data structure or component type
-            // PersonalInfo and BankingDetails will emit their respective data
             if (isObject(data) && personalKeys.some(key => key in data)) {
                 if (hasChanged(registrationStore.formData.personal, data)) {
                     registrationStore.setPersonal(data)
@@ -272,7 +260,6 @@ const handleDataChange = (data) => {
             }
             break
         case 'address-meters':
-            // Determine which component emitted
             if (isObject(data) && addressKeys.some(key => key in data)) {
                 if (hasChanged(registrationStore.formData.address, data)) {
                     registrationStore.setAddress(data)
@@ -294,9 +281,6 @@ const handleDataChange = (data) => {
                 }
             }
             break
-        case 'summary':
-            // Summary doesn't emit data changes
-            break
     }
 }
 
@@ -309,10 +293,9 @@ const handlePrev = () => {
 </script>
 
 <style scoped>
-/* Styled scrollbar for the scrollable component area */
 .scroll-area {
-    scrollbar-width: thin; /* Firefox */
-    scrollbar-color: #93c5fd #f3f4f6; /* thumb, track */
+    scrollbar-width: thin;
+    scrollbar-color: #93c5fd #f3f4f6;
 }
 
 .scroll-area::-webkit-scrollbar {
@@ -320,16 +303,16 @@ const handlePrev = () => {
 }
 
 .scroll-area::-webkit-scrollbar-track {
-    background: #f3f4f6; /* gray-100 */
+    background: #f3f4f6;
     border-radius: 8px;
 }
 
 .scroll-area::-webkit-scrollbar-thumb {
-    background: #93c5fd; /* blue-300 */
+    background: #93c5fd;
     border-radius: 8px;
 }
 
 .scroll-area::-webkit-scrollbar-thumb:hover {
-    background: #60a5fa; /* blue-400 */
+    background: #60a5fa;
 }
 </style>
