@@ -154,33 +154,45 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, computed, nextTick } from 'vue'
 import Label from '~/components/ui/label.vue'
 import { Upload, FileCheck, AlertCircle } from 'lucide-vue-next'
 
-const props = defineProps({
+type FileWithPreview = File & {
+  previewUrl?: string
+}
+
+type DocumentState = {
+  idDocument: FileWithPreview | null
+  proofOfAddress: FileWithPreview | null
+  bankStatement: FileWithPreview | null
+}
+
+const props = defineProps<{
   registrationData: {
-    type: Object,
-    required: true
+    documents?: Partial<DocumentState> | any
+    [key: string]: any
   }
-})
+}>()
 
-const emit = defineEmits(['dataChange'])
+const emit = defineEmits<{
+  dataChange: [data: { documents: DocumentState }]
+}>()
 
-const defaultDocumentState = () => ({
+const defaultDocumentState = (): DocumentState => ({
   idDocument: null,
   proofOfAddress: null,
   bankStatement: null
 })
 
-const formData = ref(defaultDocumentState())
+const formData = ref<DocumentState>(defaultDocumentState())
 const isSyncingFromProps = ref(false)
 const lastEmittedValue = ref<string>('')
-const manualErrors = ref({})
+const manualErrors = ref<Record<string, string>>({})
 
 // Helper to create a serializable representation of documents for comparison
-const serializeDocuments = (docs) => {
+const serializeDocuments = (docs: DocumentState) => {
   return JSON.stringify({
     idDocument: docs.idDocument ? {
       name: docs.idDocument.name,
@@ -229,7 +241,7 @@ watch(() => props.registrationData?.documents, (newValue) => {
   }
 }, { immediate: true, deep: true })
 
-const validateFile = (file) => {
+const validateFile = (file: FileWithPreview | null): boolean | string => {
   if (!file) return false
   
   const maxSize = 10 * 1024 * 1024 // 10MB
@@ -253,7 +265,7 @@ const validateFile = (file) => {
   return true
 }
 
-const captureFromCamera = async (field) => {
+const captureFromCamera = async (field: keyof DocumentState) => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ 
       video: { facingMode: 'environment' } // Use back camera on mobile
@@ -296,11 +308,12 @@ const captureFromCamera = async (field) => {
       canvas.width = video.videoWidth
       canvas.height = video.videoHeight
       const ctx = canvas.getContext('2d')
+      if (!ctx) return
       ctx.drawImage(video, 0, 0)
       
       canvas.toBlob((blob) => {
         if (blob) {
-          const file = new File([blob], `camera-capture-${field}-${Date.now()}.jpg`, { type: 'image/jpeg' })
+          const file = new File([blob], `camera-capture-${field}-${Date.now()}.jpg`, { type: 'image/jpeg' }) as FileWithPreview
           const validation = validateFile(file)
           
           if (validation === true) {
@@ -312,7 +325,7 @@ const captureFromCamera = async (field) => {
             }
             emitDocuments()
           } else {
-            manualErrors.value = { ...manualErrors.value, [field]: validation }
+            manualErrors.value = { ...manualErrors.value, [field]: validation as string }
           }
         }
         
@@ -345,9 +358,10 @@ const captureFromCamera = async (field) => {
   }
 }
 
-const handleFileUpload = (event, field) => {
-  const file = event.target.files[0]
-  if (!file) return
+const handleFileUpload = (event: Event, field: keyof DocumentState) => {
+  const target = event.target as HTMLInputElement
+  if (!target || !target.files || !target.files[0]) return
+  const file = target.files[0] as FileWithPreview
   
   const validation = validateFile(file)
   if (validation === true) {
@@ -358,11 +372,11 @@ const handleFileUpload = (event, field) => {
       manualErrors.value = updated
     }
   } else {
-    manualErrors.value = { ...manualErrors.value, [field]: validation }
+    manualErrors.value = { ...manualErrors.value, [field]: validation as string }
   }
 }
 
-const removeFile = (field) => {
+const removeFile = (field: keyof DocumentState) => {
   const file = formData.value[field]
   if (file && file.previewUrl) {
     URL.revokeObjectURL(file.previewUrl)
@@ -375,7 +389,7 @@ const removeFile = (field) => {
   }
 }
 
-const getFilePreview = (file) => {
+const getFilePreview = (file: FileWithPreview | null): string => {
   if (!file) return ''
   if (file.previewUrl) return file.previewUrl
   if (file.type?.startsWith('image/')) {
@@ -385,9 +399,9 @@ const getFilePreview = (file) => {
   return ''
 }
 
-const errors = computed(() => {
+const errors = computed<Record<string, string>>(() => {
   const current = formData.value
-  const newErrors = {}
+  const newErrors: Record<string, string> = {}
   
   if (!current.idDocument) {
     newErrors.idDocument = 'ID document is required'
@@ -404,30 +418,6 @@ const errors = computed(() => {
     ...manualErrors.value
   }
 })
-
-// Helper to create a serializable representation of documents for comparison
-const serializeDocuments = (docs) => {
-  return JSON.stringify({
-    idDocument: docs.idDocument ? {
-      name: docs.idDocument.name,
-      size: docs.idDocument.size,
-      type: docs.idDocument.type,
-      lastModified: docs.idDocument.lastModified
-    } : null,
-    proofOfAddress: docs.proofOfAddress ? {
-      name: docs.proofOfAddress.name,
-      size: docs.proofOfAddress.size,
-      type: docs.proofOfAddress.type,
-      lastModified: docs.proofOfAddress.lastModified
-    } : null,
-    bankStatement: docs.bankStatement ? {
-      name: docs.bankStatement.name,
-      size: docs.bankStatement.size,
-      type: docs.bankStatement.type,
-      lastModified: docs.bankStatement.lastModified
-    } : null
-  })
-}
 
 const emitDocuments = () => {
   if (isSyncingFromProps.value) {

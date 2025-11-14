@@ -20,13 +20,13 @@
             <div class="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border-0 mb-12">
                 <form id="registrationForm" @submit.prevent="handleStepComplete" novalidate>
                     <div class="p-6 lg:p-8 pt-4 lg:pt-6 overflow-y-auto max-h-[calc(100vh-220px)] md:max-h-[calc(100vh-260px)] scroll-area">
-                        <div v-if="pairedComponent" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div v-if="pairedComponent && currentComponent" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div>
                                 <KeepAlive>
                                     <component
                                         ref="currentComponentRef"
                                         :is="currentComponent"
-                                        :key="effectiveSteps[currentStep - 1].id"
+                                        :key="effectiveSteps[currentStep - 1]?.id || currentStep"
                                         v-model:type="formData.type"
                                         :registration-data="formData"
                                         @data-change="handleDataChange"
@@ -37,7 +37,7 @@
                                 <KeepAlive>
                                     <component
                                         :is="pairedComponent"
-                                        :key="'pair-' + effectiveSteps[currentStep - 1].id"
+                                        :key="'pair-' + (effectiveSteps[currentStep - 1]?.id || currentStep)"
                                         :registration-data="formData"
                                         @data-change="handleDataChange"
                                         @next="handleStepComplete"
@@ -45,18 +45,21 @@
                                 </KeepAlive>
                             </div>
                         </div>
-                        <div v-else>
+                        <div v-else-if="currentComponent">
                             <KeepAlive>
                                 <component
                                     ref="currentComponentRef"
                                     :is="currentComponent"
-                                    :key="effectiveSteps[currentStep - 1].id"
+                                    :key="effectiveSteps[currentStep - 1]?.id || currentStep"
                                     v-model:type="formData.type"
                                     :registration-data="formData"
                                     @data-change="handleDataChange"
                                     @next="handleStepComplete"
                                 />
                             </KeepAlive>
+                        </div>
+                        <div v-else class="p-6 text-center text-gray-500">
+                            Loading...
                         </div>
                     </div>
                     <div class="px-6 lg:px-8 pb-6 lg:pb-8 border-t border-gray-200 pt-6">
@@ -138,7 +141,14 @@ const isLargeScreen = ref(true)
 
 onMounted(() => {
     const mq = window.matchMedia('(min-width: 1024px)') // lg breakpoint
-    const update = () => { isLargeScreen.value = mq.matches }
+    const update = () => { 
+        isLargeScreen.value = mq.matches
+        // Adjust current step if it's out of bounds after screen size change
+        const effectiveStepsList = isLargeScreen.value ? steps5 : steps7
+        if (currentStep.value > effectiveStepsList.length) {
+            currentStep.value = effectiveStepsList.length
+        }
+    }
     update()
     mq.addEventListener('change', update)
     onBeforeUnmount(() => mq.removeEventListener('change', update))
@@ -150,7 +160,11 @@ const formData = computed(() => registrationStore.formData)
 // Effective steps depend on screen size
 const effectiveSteps = computed(() => (isLargeScreen.value ? steps5 : steps7))
 
-const currentComponent = computed(() => effectiveSteps.value[currentStep.value - 1]?.component)
+const currentComponent = computed(() => {
+    const step = effectiveSteps.value[currentStep.value - 1]
+    return step?.component || null
+})
+
 const pairedComponent = computed(() => {
     if (!isLargeScreen.value) return null
     const step = steps5[currentStep.value - 1]
@@ -248,7 +262,12 @@ const bankingKeys = ['accountHolder', 'bankName', 'accountNumber', 'accountType'
 const addressKeys = ['streetAddress', 'suburb', 'city', 'province', 'postalCode', 'complexes']
 
 const handleDataChange = (data) => {
-    const stepId = effectiveSteps.value[currentStep.value - 1]?.id
+    const currentStepIndex = currentStep.value - 1
+    if (currentStepIndex < 0 || currentStepIndex >= effectiveSteps.value.length) {
+        console.warn('Invalid step index:', currentStepIndex, 'Steps length:', effectiveSteps.value.length)
+        return
+    }
+    const stepId = effectiveSteps.value[currentStepIndex]?.id
     if (!stepId) return
     
     switch (stepId) {
