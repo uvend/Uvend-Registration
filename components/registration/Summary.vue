@@ -128,7 +128,7 @@
           <div v-if="registrationData.documents?.bankStatement" class="flex items-center space-x-4 p-3 bg-blue-50 rounded-lg">
             <FileIcon class="h-5 w-5 text-blue-600" />
             <div>
-              <p class="text-sm font-medium text-gray-900">Bank Statement</p>
+              <p class="text-sm font-medium text-gray-900">Bank Confirmation</p>
               <p class="text-xs text-gray-500">{{ registrationData.documents.bankStatement.name }}</p>
             </div>
           </div>
@@ -566,7 +566,7 @@ const createPDFContent = async () => {
             ` : ''}
             ${props.registrationData.documents?.bankStatement ? `
               <div style="border: 1px solid #e5e7eb; padding: 15px; background-color: #f9fafb;">
-                <h3 style="color: #374151; font-size: 16px; margin-bottom: 10px;">Bank Statement: ${props.registrationData.documents.bankStatement.name}</h3>
+                <h3 style="color: #374151; font-size: 16px; margin-bottom: 10px;">Bank Confirmation: ${props.registrationData.documents.bankStatement.name}</h3>
                 ${bankImage ? `<img src="${bankImage}" style="max-width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 4px;" />` : '<p style="color: #6b7280;">Document preview unavailable</p>'}
               </div>
             ` : ''}

@@ -104,9 +104,9 @@
           </span>
         </div>
 
-        <!-- Bank Statement -->
+        <!-- Bank Confirmation -->
         <div class="space-y-3">
-          <Label class="text-gray-700 font-medium">Bank Statement (Last 3 months)</Label>
+          <Label class="text-gray-700 font-medium">Bank Confirmation (Last 3 months)</Label>
           <div class="bg-white/80 backdrop-blur-sm border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 hover:border-blue-400 hover:bg-blue-50/50 shadow-lg"
                :class="errors.bankStatement ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-blue-400'">
             <div v-if="!formData.bankStatement" class="space-y-4">
@@ -118,7 +118,7 @@
               <div class="text-sm text-gray-600">
                 <div class="flex flex-col sm:flex-row gap-2 justify-center items-center">
                   <label for="bankStatement" class="relative cursor-pointer rounded-md font-semibold text-blue-600 hover:text-blue-700 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
-                    <span>Upload bank statement</span>
+                    <span>Upload bank confirmation</span>
                     <input id="bankStatement" name="bankStatement" type="file" class="sr-only" @change="handleFileUpload($event, 'bankStatement')" accept="image/*,.pdf" capture="environment">
                   </label>
                   <span class="text-gray-400">or</span>
@@ -134,7 +134,7 @@
             <div v-else class="space-y-3">
               <div class="flex items-center justify-center">
                 <div v-if="formData.bankStatement.type?.startsWith('image/')" class="max-w-xs">
-                  <img :src="getFilePreview(formData.bankStatement)" alt="Bank statement preview" class="max-h-48 w-auto mx-auto rounded-lg border-2 border-gray-200" />
+                  <img :src="getFilePreview(formData.bankStatement)" alt="Bank confirmation preview" class="max-h-48 w-auto mx-auto rounded-lg border-2 border-gray-200" />
                 </div>
                 <div v-else class="p-3 bg-green-100 rounded-full">
                   <FileCheck class="h-8 w-8 text-green-600" />
@@ -410,7 +410,7 @@ const errors = computed<Record<string, string>>(() => {
     newErrors.proofOfAddress = 'Proof of address is required'
   }
   if (!current.bankStatement) {
-    newErrors.bankStatement = 'Bank statement is required'
+    newErrors.bankStatement = 'Bank confirmation is required'
   }
 
   return {
