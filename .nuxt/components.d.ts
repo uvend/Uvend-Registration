@@ -22,6 +22,7 @@ export const RegistrationNavigationButtons: typeof import("../components/registr
 export const RegistrationPersonalInfo: typeof import("../components/registration/PersonalInfo.vue")['default']
 export const RegistrationType: typeof import("../components/registration/RegistrationType.vue")['default']
 export const RegistrationSummary: typeof import("../components/registration/Summary.vue")['default']
+export const RegistrationTermsAndConditionsDialog: typeof import("../components/registration/TermsAndConditionsDialog.vue")['default']
 export const UiButton: typeof import("../components/ui/button.vue")['default']
 export const UiCheckbox: typeof import("../components/ui/checkbox.vue")['default']
 export const UiInput: typeof import("../components/ui/input.vue")['default']
@@ -58,6 +59,7 @@ export const LazyRegistrationNavigationButtons: LazyComponent<typeof import("../
 export const LazyRegistrationPersonalInfo: LazyComponent<typeof import("../components/registration/PersonalInfo.vue")['default']>
 export const LazyRegistrationType: LazyComponent<typeof import("../components/registration/RegistrationType.vue")['default']>
 export const LazyRegistrationSummary: LazyComponent<typeof import("../components/registration/Summary.vue")['default']>
+export const LazyRegistrationTermsAndConditionsDialog: LazyComponent<typeof import("../components/registration/TermsAndConditionsDialog.vue")['default']>
 export const LazyUiButton: LazyComponent<typeof import("../components/ui/button.vue")['default']>
 export const LazyUiCheckbox: LazyComponent<typeof import("../components/ui/checkbox.vue")['default']>
 export const LazyUiInput: LazyComponent<typeof import("../components/ui/input.vue")['default']>

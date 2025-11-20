@@ -22,6 +22,7 @@ interface _GlobalComponents {
   'RegistrationPersonalInfo': typeof import("../../components/registration/PersonalInfo.vue")['default']
   'RegistrationType': typeof import("../../components/registration/RegistrationType.vue")['default']
   'RegistrationSummary': typeof import("../../components/registration/Summary.vue")['default']
+  'RegistrationTermsAndConditionsDialog': typeof import("../../components/registration/TermsAndConditionsDialog.vue")['default']
   'UiButton': typeof import("../../components/ui/button.vue")['default']
   'UiCheckbox': typeof import("../../components/ui/checkbox.vue")['default']
   'UiInput': typeof import("../../components/ui/input.vue")['default']
@@ -58,6 +59,7 @@ interface _GlobalComponents {
   'LazyRegistrationPersonalInfo': LazyComponent<typeof import("../../components/registration/PersonalInfo.vue")['default']>
   'LazyRegistrationType': LazyComponent<typeof import("../../components/registration/RegistrationType.vue")['default']>
   'LazyRegistrationSummary': LazyComponent<typeof import("../../components/registration/Summary.vue")['default']>
+  'LazyRegistrationTermsAndConditionsDialog': LazyComponent<typeof import("../../components/registration/TermsAndConditionsDialog.vue")['default']>
   'LazyUiButton': LazyComponent<typeof import("../../components/ui/button.vue")['default']>
   'LazyUiCheckbox': LazyComponent<typeof import("../../components/ui/checkbox.vue")['default']>
   'LazyUiInput': LazyComponent<typeof import("../../components/ui/input.vue")['default']>

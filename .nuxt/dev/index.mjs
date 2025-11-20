@@ -2329,14 +2329,41 @@ const registration_post = defineEventHandler(async (event) => {
         documents: (() => {
           const createdDocs = [];
           if (documents.idDocument) {
-            createdDocs.push({ kind: "idDocument", fileName: null, mimeType: null, url: null });
+            const doc = documents.idDocument;
+            createdDocs.push({
+              kind: "idDocument",
+              fileName: (doc == null ? void 0 : doc.name) || null,
+              mimeType: (doc == null ? void 0 : doc.type) || null,
+              url: null
+            });
           }
           if (documents.proofOfAddress) {
-            createdDocs.push({ kind: "proofOfAddress", fileName: null, mimeType: null, url: null });
+            const doc = documents.proofOfAddress;
+            createdDocs.push({
+              kind: "proofOfAddress",
+              fileName: (doc == null ? void 0 : doc.name) || null,
+              mimeType: (doc == null ? void 0 : doc.type) || null,
+              url: null
+            });
+          }
+          if (documents.bankStatement) {
+            const doc = documents.bankStatement;
+            createdDocs.push({
+              kind: "bankStatement",
+              fileName: (doc == null ? void 0 : doc.name) || null,
+              mimeType: (doc == null ? void 0 : doc.type) || null,
+              url: null
+            });
           }
           if (Array.isArray(documents.additionalDocuments)) {
             for (let i = 0; i < documents.additionalDocuments.length; i++) {
-              createdDocs.push({ kind: "additional", fileName: null, mimeType: null, url: null });
+              const doc = documents.additionalDocuments[i];
+              createdDocs.push({
+                kind: "additional",
+                fileName: (doc == null ? void 0 : doc.name) || null,
+                mimeType: (doc == null ? void 0 : doc.type) || null,
+                url: null
+              });
             }
           }
           return createdDocs.length ? { create: createdDocs } : void 0;
@@ -2437,7 +2464,18 @@ U-Vend Team
     };
   } catch (error) {
     console.error("Registration save failed:", error);
-    throw createError({ statusCode: 500, statusMessage: (error == null ? void 0 : error.message) || "Failed to save registration" });
+    console.error("Error details:", {
+      message: error == null ? void 0 : error.message,
+      stack: error == null ? void 0 : error.stack,
+      code: error == null ? void 0 : error.code,
+      meta: error == null ? void 0 : error.meta
+    });
+    const errorMessage = (error == null ? void 0 : error.message) || "Failed to save registration";
+    const errorDetails = (error == null ? void 0 : error.meta) ? ` Details: ${JSON.stringify(error.meta)}` : "";
+    throw createError({
+      statusCode: 500,
+      statusMessage: `${errorMessage}${errorDetails}`
+    });
   }
 });
 
