@@ -314,13 +314,46 @@
       </div>
       <p v-else class="text-sm text-gray-500">No meters added</p>
     </div>
+
+    <!-- Terms and Conditions -->
+    <div class="bg-white/80 backdrop-blur-sm rounded-xl border-0 p-6 space-y-4 shadow-lg">
+      <div class="flex items-start space-x-3">
+        <Checkbox
+          :id="'terms-checkbox'"
+          v-model="termsAccepted"
+          class="mt-0.5"
+        />
+        <label
+          :for="'terms-checkbox'"
+          class="text-sm text-gray-700 leading-relaxed cursor-pointer"
+        >
+          I have read and agree to the
+          <button
+            type="button"
+            @click="showTermsDialog = true"
+            class="text-blue-600 hover:text-blue-700 underline font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+          >
+            terms and conditions
+          </button>
+        </label>
+      </div>
+      <p v-if="termsError" class="text-sm text-red-500 flex items-center gap-1">
+        <AlertCircle class="h-4 w-4" />
+        {{ termsError }}
+      </p>
+    </div>
   </div>
+
+  <!-- Terms and Conditions Dialog -->
+  <TermsAndConditionsDialog v-model:isOpen="showTermsDialog" />
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { PencilIcon, FileIcon, PrinterIcon, Loader2Icon, FileCheck2 } from 'lucide-vue-next'
+import { ref, computed, watch } from 'vue'
+import { PencilIcon, FileIcon, PrinterIcon, Loader2Icon, FileCheck2, AlertCircle } from 'lucide-vue-next'
 import Button from '~/components/ui/button.vue'
+import Checkbox from '~/components/ui/checkbox.vue'
+import TermsAndConditionsDialog from '~/components/registration/TermsAndConditionsDialog.vue'
 
 const props = defineProps({
   registrationData: {
@@ -340,6 +373,28 @@ const emit = defineEmits(['edit', 'submit'])
 
 const isGeneratingPDF = ref(false)
 const isSubmitting = ref(false)
+const termsAccepted = ref(false)
+const showTermsDialog = ref(false)
+const termsError = ref('')
+
+// Watch for terms acceptance changes and emit to parent
+watch(termsAccepted, (value) => {
+  termsError.value = ''
+  emit('terms-change', value)
+})
+
+// Expose terms acceptance state
+defineExpose({
+  getTermsAccepted: () => termsAccepted.value,
+  validateTerms: () => {
+    if (!termsAccepted.value) {
+      termsError.value = 'You must accept the terms and conditions to proceed'
+      return false
+    }
+    termsError.value = ''
+    return true
+  }
+})
 
 const hasDocuments = computed(() => {
   return props.registrationData.documents && (

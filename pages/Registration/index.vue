@@ -191,6 +191,17 @@ const handleStepComplete = async () => {
         // Get the current component instance using template ref
         const componentRef = currentComponentRef.value
         
+        // If on the last step (Summary), validate terms acceptance
+        if (currentStep.value === effectiveSteps.value.length) {
+            if (componentRef && typeof componentRef.validateTerms === 'function') {
+                const isValid = componentRef.validateTerms()
+                if (!isValid) {
+                    loading.value = false
+                    return
+                }
+            }
+        }
+        
         // Try to call submit method on the component
         if (componentRef && typeof componentRef.submit === 'function') {
             // Call submit for any side effects, but do not block progression
