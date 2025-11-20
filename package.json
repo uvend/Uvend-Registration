@@ -13,23 +13,23 @@
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.8",
-    "@prisma/client": "^6.19.0",
-    "html2pdf.js": "^0.10.1",
-    "nodemailer": "^6.9.8",
-    "pdfjs-dist": "^4.0.379"
-  },
-  "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.12.2",
     "@pinia/nuxt": "^0.5.1",
-    "@types/node": "^20.0.0",
-    "@types/nodemailer": "^6.4.0",
+    "@prisma/client": "^6.19.0",
     "clsx": "^2.1.1",
+    "html2pdf.js": "^0.10.1",
     "lucide-vue-next": "^0.460.0",
+    "nodemailer": "^6.9.8",
     "nuxt": "^4.2.1",
+    "pdfjs-dist": "^4.0.379",
     "pinia": "^2.1.7",
     "prisma": "^6.19.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/nodemailer": "^6.4.0"
   }
 }
