@@ -135,14 +135,41 @@ export default defineEventHandler(async (event) => {
         documents: (() => {
           const createdDocs: any[] = []
           if (documents.idDocument) {
-            createdDocs.push({ kind: 'idDocument', fileName: null, mimeType: null, url: null })
+            const doc = documents.idDocument
+            createdDocs.push({ 
+              kind: 'idDocument', 
+              fileName: doc?.name || null, 
+              mimeType: doc?.type || null, 
+              url: null 
+            })
           }
           if (documents.proofOfAddress) {
-            createdDocs.push({ kind: 'proofOfAddress', fileName: null, mimeType: null, url: null })
+            const doc = documents.proofOfAddress
+            createdDocs.push({ 
+              kind: 'proofOfAddress', 
+              fileName: doc?.name || null, 
+              mimeType: doc?.type || null, 
+              url: null 
+            })
+          }
+          if (documents.bankStatement) {
+            const doc = documents.bankStatement
+            createdDocs.push({ 
+              kind: 'bankStatement', 
+              fileName: doc?.name || null, 
+              mimeType: doc?.type || null, 
+              url: null 
+            })
           }
           if (Array.isArray(documents.additionalDocuments)) {
             for (let i = 0; i < documents.additionalDocuments.length; i++) {
-              createdDocs.push({ kind: 'additional', fileName: null, mimeType: null, url: null })
+              const doc = documents.additionalDocuments[i]
+              createdDocs.push({ 
+                kind: 'additional', 
+                fileName: doc?.name || null, 
+                mimeType: doc?.type || null, 
+                url: null 
+              })
             }
           }
           return createdDocs.length ? { create: createdDocs } : undefined
@@ -257,7 +284,19 @@ U-Vend Team
     }
   } catch (error: any) {
     console.error('Registration save failed:', error)
-    throw createError({ statusCode: 500, statusMessage: error?.message || 'Failed to save registration' })
+    console.error('Error details:', {
+      message: error?.message,
+      stack: error?.stack,
+      code: error?.code,
+      meta: error?.meta
+    })
+    // Return more detailed error information for debugging
+    const errorMessage = error?.message || 'Failed to save registration'
+    const errorDetails = error?.meta ? ` Details: ${JSON.stringify(error.meta)}` : ''
+    throw createError({ 
+      statusCode: 500, 
+      statusMessage: `${errorMessage}${errorDetails}` 
+    })
   }
 })
 

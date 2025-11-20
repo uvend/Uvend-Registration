@@ -228,13 +228,40 @@ const handleStepComplete = async () => {
 
 const handleSubmit = async () => {
     try {
+        // Extract document metadata (not File objects) to avoid serialization issues
+        const documentMetadata = {}
+        if (formData.value.documents?.idDocument) {
+            const doc = formData.value.documents.idDocument
+            documentMetadata.idDocument = {
+                name: doc.name,
+                type: doc.type,
+                size: doc.size
+            }
+        }
+        if (formData.value.documents?.proofOfAddress) {
+            const doc = formData.value.documents.proofOfAddress
+            documentMetadata.proofOfAddress = {
+                name: doc.name,
+                type: doc.type,
+                size: doc.size
+            }
+        }
+        if (formData.value.documents?.bankStatement) {
+            const doc = formData.value.documents.bankStatement
+            documentMetadata.bankStatement = {
+                name: doc.name,
+                type: doc.type,
+                size: doc.size
+            }
+        }
+
         const payload = {
             type: formData.value.type,
             personal: formData.value.personal,
             banking: formData.value.banking,
             address: formData.value.address,
             meters: formData.value.meters,
-            documents: formData.value.documents
+            documents: documentMetadata
         }
 
         const res = await $fetch('/api/registration', {
