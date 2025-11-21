@@ -2212,6 +2212,15 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
 const prisma = new PrismaClient();
 const createTransporter = () => {
   const emailService = process.env.EMAIL_SERVICE || "smtp";
+  console.log("Creating email transporter:", {
+    emailService,
+    hasSendGridKey: !!process.env.SENDGRID_API_KEY,
+    smtpHost: process.env.SMTP_HOST || "smtp.uvend.co.za",
+    smtpPort: process.env.SMTP_PORT || "587",
+    emailUser: process.env.EMAIL_USER || "registrations@uvend.co.za",
+    hasEmailPass: !!process.env.EMAIL_PASS,
+    secure: process.env.SMTP_SECURE === "true" || parseInt(process.env.SMTP_PORT || "587") === 465
+  });
   if (emailService === "sendgrid") {
     if (!process.env.SENDGRID_API_KEY) {
       throw new Error("SENDGRID_API_KEY is required when using SendGrid");
@@ -2226,18 +2235,85 @@ const createTransporter = () => {
   } else {
     const emailUser = process.env.EMAIL_USER || "registrations@uvend.co.za";
     const emailPass = process.env.EMAIL_PASS;
+    if (!emailPass || emailPass.trim() === "") {
+      throw new Error("EMAIL_PASS environment variable is required for SMTP authentication. Please set it in your .env file or environment variables.");
+    }
+    const smtpPort = parseInt(process.env.SMTP_PORT || "587");
+    const useSecure = smtpPort === 465 || process.env.SMTP_SECURE === "true";
+    let decodedPassword = emailPass;
+    try {
+      if (emailPass.includes("%")) {
+        decodedPassword = decodeURIComponent(emailPass);
+      }
+    } catch (e) {
+      decodedPassword = emailPass;
+    }
+    const cleanPassword = decodedPassword.trim();
+    const cleanUser = emailUser.trim();
     const transporterConfig = {
       host: process.env.SMTP_HOST || "smtp.uvend.co.za",
-      port: parseInt(process.env.SMTP_PORT || "587"),
-      secure: process.env.SMTP_SECURE === "true"
+      port: smtpPort,
+      secure: useSecure,
+      // false for port 587 (STARTTLS), true for port 465 (SSL)
+      // Add connection timeout and other options
+      connectionTimeout: 1e4,
+      greetingTimeout: 1e4,
+      socketTimeout: 1e4,
+      // Authentication - same username as incoming (as per your config)
+      authMethod: "PLAIN",
+      // Explicitly set authentication method
+      auth: {
+        user: cleanUser,
+        pass: cleanPassword
+      },
+      // TLS options for STARTTLS (port 587)
+      requireTLS: !useSecure,
+      // Require TLS for port 587
+      tls: {
+        rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== "false",
+        // Set to false only for self-signed certs
+        ciphers: "SSLv3"
+        // Some servers require specific cipher
+      },
+      // Some SMTP servers require specific options
+      pool: false,
+      maxConnections: 1,
+      maxMessages: 1
     };
-    if (emailPass && emailPass.trim() !== "") {
-      transporterConfig.auth = {
-        user: emailUser,
-        pass: emailPass
-      };
-    }
-    return nodemailer.createTransport(transporterConfig);
+    console.log("SMTP Auth Details:", {
+      user: cleanUser,
+      passwordLength: cleanPassword.length,
+      passwordStartsWith: cleanPassword.substring(0, 1) + "***",
+      passwordEndsWith: "***" + cleanPassword.substring(cleanPassword.length - 1),
+      hasSpecialChars: /[^a-zA-Z0-9]/.test(cleanPassword)
+    });
+    console.log("SMTP authentication configured with user:", emailUser);
+    const transporter = nodemailer.createTransport(transporterConfig);
+    transporter.verify((error, success) => {
+      if (error) {
+        console.error("SMTP connection verification failed:", {
+          message: error.message,
+          code: error.code,
+          command: error.command,
+          response: error.response,
+          responseCode: error.responseCode
+        });
+        if (error.code === "EAUTH" || error.responseCode === 535) {
+          console.error("\n=== SMTP AUTHENTICATION ERROR ===");
+          console.error("The SMTP server rejected the login credentials.");
+          console.error("Common fixes:");
+          console.error("1. Verify EMAIL_USER and EMAIL_PASS are correct");
+          console.error("2. For Gmail: Use an App Password instead of your regular password");
+          console.error("3. For Office 365: Check if account requires OAuth2");
+          console.error("4. Verify SMTP settings (host, port, secure) are correct");
+          console.error('5. Check if account has "Less secure app access" enabled (if applicable)');
+          console.error("===================================\n");
+        }
+      } else {
+        console.log("SMTP connection verified successfully");
+      }
+    });
+    return transporter;
   }
 };
 const sendEmail = async (to, subject, html, text, attachments) => {
@@ -2245,6 +2321,16 @@ const sendEmail = async (to, subject, html, text, attachments) => {
     const transporter = createTransporter();
     const from = process.env.EMAIL_FROM || "noreply@uvend.co.za";
     const recipients = Array.isArray(to) ? to : [to];
+    console.log("Sending email:", {
+      from,
+      to: recipients,
+      subject,
+      hasAttachments: attachments && attachments.length > 0,
+      attachmentCount: (attachments == null ? void 0 : attachments.length) || 0,
+      emailService: process.env.EMAIL_SERVICE || "smtp",
+      smtpHost: process.env.SMTP_HOST || "smtp.uvend.co.za",
+      smtpPort: process.env.SMTP_PORT || "587"
+    });
     const mailOptions = {
       from,
       to: recipients,
@@ -2254,11 +2340,42 @@ const sendEmail = async (to, subject, html, text, attachments) => {
       attachments: attachments || []
     };
     const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent successfully:", info.messageId);
+    console.log("Email sent successfully:", {
+      messageId: info.messageId,
+      response: info.response,
+      accepted: info.accepted,
+      rejected: info.rejected
+    });
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("Error sending email:", error);
-    return { success: false, error: error.message };
+    const errorDetails = {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode,
+      stack: error.stack
+    };
+    console.error("Error sending email:", errorDetails);
+    if (error.code === "EAUTH" || error.responseCode === 535) {
+      console.error("\n=== EMAIL AUTHENTICATION FAILED ===");
+      console.error("Error: Invalid login credentials (535 Incorrect authentication data)");
+      console.error("\nTroubleshooting steps:");
+      console.error("1. Check EMAIL_USER environment variable:", process.env.EMAIL_USER || "registrations@uvend.co.za");
+      console.error("2. Verify EMAIL_PASS is set correctly (check for extra spaces or special characters)");
+      console.error("3. For Gmail/Google Workspace:");
+      console.error("   - Generate an App Password at: https://myaccount.google.com/apppasswords");
+      console.error("   - Use the App Password instead of your regular password");
+      console.error("4. For Office 365/Outlook:");
+      console.error("   - May require OAuth2 instead of basic auth");
+      console.error("   - Check if account has MFA enabled (requires app password)");
+      console.error("5. Verify SMTP settings:");
+      console.error("   - Host:", process.env.SMTP_HOST || "smtp.uvend.co.za");
+      console.error("   - Port:", process.env.SMTP_PORT || "587");
+      console.error("   - Secure:", process.env.SMTP_SECURE === "true");
+      console.error("===================================\n");
+    }
+    return { success: false, error: error.message, details: errorDetails };
   }
 };
 const registration_post = defineEventHandler(async (event) => {
@@ -2377,54 +2494,36 @@ const registration_post = defineEventHandler(async (event) => {
       encoding: "base64"
     }] : [];
     const customerName = `${personal.firstName} ${personal.lastName}`;
-    const registrationType = type === "new" ? "New Registration" : type === "update" ? "Update Registration" : "Existing Customer Update";
     const officeEmailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #1f2937;">New Registration Submission</h2>
-        <p>Hello,</p>
-        <p><strong>${customerName}</strong> has successfully registered with U-Vend.</p>
-        <p><strong>Registration Type:</strong> ${registrationType}</p>
-        <p><strong>Customer Details:</strong></p>
-        <ul>
-          <li><strong>Name:</strong> ${customerName}</li>
-          <li><strong>Email:</strong> ${personal.email}</li>
-          <li><strong>Phone:</strong> ${personal.phone || "Not provided"}</li>
-          <li><strong>ID Number:</strong> ${personal.idNumber || "Not provided"}</li>
-        </ul>
-        <p>Please find the complete registration details attached as a PDF. Please review and process this registration.</p>
-        <p>Submitted on: ${(/* @__PURE__ */ new Date()).toLocaleString("en-ZA", { timeZone: "Africa/Johannesburg" })}</p>
-        <p>Best regards,<br>U-Vend Registration System</p>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <p style="font-size: 16px; color: #1f2937; margin-bottom: 20px;">
+          This is the Registration of <strong>${personal.firstName} ${personal.lastName}</strong>
+        </p>
+        <p style="font-size: 14px; color: #6b7280;">
+          Please find the registration details attached as a PDF.
+        </p>
       </div>
     `;
-    const officeEmailText = `
-New Registration Submission
+    const officeEmailText = `This is the Registration of ${personal.firstName} ${personal.lastName}
 
-${customerName} has successfully registered with U-Vend.
-
-Registration Type: ${registrationType}
-
-Customer Details:
-- Name: ${customerName}
-- Email: ${personal.email}
-- Phone: ${personal.phone || "Not provided"}
-- ID Number: ${personal.idNumber || "Not provided"}
-
-Please find the complete registration details attached as a PDF. Please review and process this registration.
-
-Submitted on: ${(/* @__PURE__ */ new Date()).toLocaleString("en-ZA", { timeZone: "Africa/Johannesburg" })}
-    `.trim();
+Please find the registration details attached as a PDF.`;
     const officeRecipients = [
       "registrations@uvend.co.za",
       "shawaal@uvend.co.za",
       "Ross@uvend.co.za"
     ];
-    await sendEmail(
+    const emailResult = await sendEmail(
       officeRecipients,
-      `${customerName} - New Registration Submission`,
+      `Registration of ${personal.firstName} ${personal.lastName}`,
       officeEmailHtml,
       officeEmailText,
       pdfAttachment
     );
+    if (!emailResult.success) {
+      console.error("Failed to send email to office:", emailResult.error);
+    } else {
+      console.log("Email sent successfully to office:", emailResult.messageId);
+    }
     const customerEmailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #1f2937;">Registration Successful - U-Vend</h2>
@@ -2451,12 +2550,17 @@ If you have any questions or need assistance, please don't hesitate to contact u
 Best regards,
 U-Vend Team
     `.trim();
-    await sendEmail(
+    const customerEmailResult = await sendEmail(
       personal.email,
       "Registration Successful - U-Vend",
       customerEmailHtml,
       customerEmailText
     );
+    if (!customerEmailResult.success) {
+      console.error("Failed to send email to customer:", customerEmailResult.error);
+    } else {
+      console.log("Email sent successfully to customer:", customerEmailResult.messageId);
+    }
     return {
       success: true,
       id: created.id,

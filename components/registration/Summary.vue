@@ -383,7 +383,38 @@ watch(termsAccepted, (value) => {
   emit('terms-change', value)
 })
 
-// Expose terms acceptance state
+// Generate PDF and return as base64
+const generatePDFBase64 = async () => {
+  try {
+    const html2pdf = (await import('html2pdf.js')).default
+    const pdfContent = await createPDFContent()
+    
+    const options = {
+      margin: [10, 10, 10, 10],
+      filename: `registration-summary-${new Date().toISOString().split('T')[0]}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }
+    
+    const pdfBlob = await html2pdf().from(pdfContent).set(options).outputPdf('blob')
+    
+    // Convert PDF blob to base64
+    const pdfBase64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result)
+      reader.onerror = reject
+      reader.readAsDataURL(pdfBlob)
+    })
+    
+    return pdfBase64
+  } catch (error) {
+    console.error('Error generating PDF:', error)
+    throw error
+  }
+}
+
+// Expose terms acceptance state and PDF generation
 defineExpose({
   getTermsAccepted: () => termsAccepted.value,
   validateTerms: () => {
@@ -393,7 +424,8 @@ defineExpose({
     }
     termsError.value = ''
     return true
-  }
+  },
+  generatePDFBase64
 })
 
 const hasDocuments = computed(() => {

@@ -7,6 +7,16 @@ const prisma = new PrismaClient()
 const createTransporter = () => {
   const emailService = process.env.EMAIL_SERVICE || 'smtp'
   
+    console.log('Creating email transporter:', {
+      emailService,
+      hasSendGridKey: !!process.env.SENDGRID_API_KEY,
+      smtpHost: process.env.SMTP_HOST || 'smtp.uvend.co.za',
+      smtpPort: process.env.SMTP_PORT || '587',
+      emailUser: process.env.EMAIL_USER || 'registrations@uvend.co.za',
+      hasEmailPass: !!process.env.EMAIL_PASS,
+      secure: process.env.SMTP_SECURE === 'true' || parseInt(process.env.SMTP_PORT || '587') === 465
+    })
+  
   if (emailService === 'sendgrid') {
     if (!process.env.SENDGRID_API_KEY) {
       throw new Error('SENDGRID_API_KEY is required when using SendGrid')
@@ -19,25 +29,103 @@ const createTransporter = () => {
       }
     })
   } else {
-    // SMTP Configuration (default)
+    // SMTP Configuration (default) - Matching mail.uvend.co.za settings
     const emailUser = process.env.EMAIL_USER || 'registrations@uvend.co.za'
     const emailPass = process.env.EMAIL_PASS
     
-    // Only include auth if password is provided
+    if (!emailPass || emailPass.trim() === '') {
+      throw new Error('EMAIL_PASS environment variable is required for SMTP authentication. Please set it in your .env file or environment variables.')
+    }
+    
+    // SMTP Configuration matching your mail client settings
+    // Port 587 uses STARTTLS (secure: false), Port 465 uses SSL (secure: true)
+    const smtpPort = parseInt(process.env.SMTP_PORT || '587')
+    const useSecure = smtpPort === 465 || process.env.SMTP_SECURE === 'true'
+    
+    // Try to decode password if it's URL encoded (some env vars get encoded)
+    let decodedPassword = emailPass
+    try {
+      // Check if password is URL encoded and decode it
+      if (emailPass.includes('%')) {
+        decodedPassword = decodeURIComponent(emailPass)
+      }
+    } catch (e) {
+      // If decoding fails, use original password
+      decodedPassword = emailPass
+    }
+    
+    // Remove any leading/trailing whitespace that might cause issues
+    const cleanPassword = decodedPassword.trim()
+    const cleanUser = emailUser.trim()
+    
     const transporterConfig: any = {
       host: process.env.SMTP_HOST || 'smtp.uvend.co.za',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true'
+      port: smtpPort,
+      secure: useSecure, // false for port 587 (STARTTLS), true for port 465 (SSL)
+      // Add connection timeout and other options
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
+      // Authentication - same username as incoming (as per your config)
+      authMethod: 'PLAIN', // Explicitly set authentication method
+      auth: {
+        user: cleanUser,
+        pass: cleanPassword
+      },
+      // TLS options for STARTTLS (port 587)
+      requireTLS: !useSecure, // Require TLS for port 587
+      tls: {
+        rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false', // Set to false only for self-signed certs
+        ciphers: 'SSLv3' // Some servers require specific cipher
+      },
+      // Some SMTP servers require specific options
+      pool: false,
+      maxConnections: 1,
+      maxMessages: 1
     }
     
-    if (emailPass && emailPass.trim() !== '') {
-      transporterConfig.auth = {
-        user: emailUser,
-        pass: emailPass
+    // Log password length for debugging (not the actual password)
+    console.log('SMTP Auth Details:', {
+      user: cleanUser,
+      passwordLength: cleanPassword.length,
+      passwordStartsWith: cleanPassword.substring(0, 1) + '***',
+      passwordEndsWith: '***' + cleanPassword.substring(cleanPassword.length - 1),
+      hasSpecialChars: /[^a-zA-Z0-9]/.test(cleanPassword)
+    })
+    
+    console.log('SMTP authentication configured with user:', emailUser)
+    
+    const transporter = nodemailer.createTransport(transporterConfig)
+    
+    // Verify transporter configuration (async, but don't block)
+    transporter.verify((error: any, success) => {
+      if (error) {
+        console.error('SMTP connection verification failed:', {
+          message: error.message,
+          code: error.code,
+          command: error.command,
+          response: error.response,
+          responseCode: error.responseCode
+        })
+        
+        // Provide helpful error messages
+        if (error.code === 'EAUTH' || error.responseCode === 535) {
+          console.error('\n=== SMTP AUTHENTICATION ERROR ===')
+          console.error('The SMTP server rejected the login credentials.')
+          console.error('Common fixes:')
+          console.error('1. Verify EMAIL_USER and EMAIL_PASS are correct')
+          console.error('2. For Gmail: Use an App Password instead of your regular password')
+          console.error('3. For Office 365: Check if account requires OAuth2')
+          console.error('4. Verify SMTP settings (host, port, secure) are correct')
+          console.error('5. Check if account has "Less secure app access" enabled (if applicable)')
+          console.error('===================================\n')
+        }
+      } else {
+        console.log('SMTP connection verified successfully')
       }
-    }
+    })
     
-    return nodemailer.createTransport(transporterConfig)
+    return transporter
   }
 }
 
@@ -49,6 +137,18 @@ const sendEmail = async (to: string | string[], subject: string, html: string, t
     
     const recipients = Array.isArray(to) ? to : [to]
     
+    // Log email configuration (without sensitive data)
+    console.log('Sending email:', {
+      from,
+      to: recipients,
+      subject,
+      hasAttachments: attachments && attachments.length > 0,
+      attachmentCount: attachments?.length || 0,
+      emailService: process.env.EMAIL_SERVICE || 'smtp',
+      smtpHost: process.env.SMTP_HOST || 'smtp.uvend.co.za',
+      smtpPort: process.env.SMTP_PORT || '587'
+    })
+    
     const mailOptions = {
       from,
       to: recipients,
@@ -59,12 +159,47 @@ const sendEmail = async (to: string | string[], subject: string, html: string, t
     }
 
     const info = await transporter.sendMail(mailOptions)
-    console.log('Email sent successfully:', info.messageId)
+    console.log('Email sent successfully:', {
+      messageId: info.messageId,
+      response: info.response,
+      accepted: info.accepted,
+      rejected: info.rejected
+    })
     return { success: true, messageId: info.messageId }
   } catch (error: any) {
-    console.error('Error sending email:', error)
+    const errorDetails = {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode,
+      stack: error.stack
+    }
+    
+    console.error('Error sending email:', errorDetails)
+    
+    // Provide helpful error message for authentication errors
+    if (error.code === 'EAUTH' || error.responseCode === 535) {
+      console.error('\n=== EMAIL AUTHENTICATION FAILED ===')
+      console.error('Error: Invalid login credentials (535 Incorrect authentication data)')
+      console.error('\nTroubleshooting steps:')
+      console.error('1. Check EMAIL_USER environment variable:', process.env.EMAIL_USER || 'registrations@uvend.co.za')
+      console.error('2. Verify EMAIL_PASS is set correctly (check for extra spaces or special characters)')
+      console.error('3. For Gmail/Google Workspace:')
+      console.error('   - Generate an App Password at: https://myaccount.google.com/apppasswords')
+      console.error('   - Use the App Password instead of your regular password')
+      console.error('4. For Office 365/Outlook:')
+      console.error('   - May require OAuth2 instead of basic auth')
+      console.error('   - Check if account has MFA enabled (requires app password)')
+      console.error('5. Verify SMTP settings:')
+      console.error('   - Host:', process.env.SMTP_HOST || 'smtp.uvend.co.za')
+      console.error('   - Port:', process.env.SMTP_PORT || '587')
+      console.error('   - Secure:', process.env.SMTP_SECURE === 'true')
+      console.error('===================================\n')
+    }
+    
     // Don't throw - log error but don't fail registration
-    return { success: false, error: error.message }
+    return { success: false, error: error.message, details: errorDetails }
   }
 }
 
@@ -185,45 +320,20 @@ export default defineEventHandler(async (event) => {
     }] : []
 
     const customerName = `${personal.firstName} ${personal.lastName}`
-    const registrationType = type === 'new' ? 'New Registration' : type === 'update' ? 'Update Registration' : 'Existing Customer Update'
 
-    // Email 1: Send to registration office with PDF
+    // Simple email template as requested
     const officeEmailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #1f2937;">New Registration Submission</h2>
-        <p>Hello,</p>
-        <p><strong>${customerName}</strong> has successfully registered with U-Vend.</p>
-        <p><strong>Registration Type:</strong> ${registrationType}</p>
-        <p><strong>Customer Details:</strong></p>
-        <ul>
-          <li><strong>Name:</strong> ${customerName}</li>
-          <li><strong>Email:</strong> ${personal.email}</li>
-          <li><strong>Phone:</strong> ${personal.phone || 'Not provided'}</li>
-          <li><strong>ID Number:</strong> ${personal.idNumber || 'Not provided'}</li>
-        </ul>
-        <p>Please find the complete registration details attached as a PDF. Please review and process this registration.</p>
-        <p>Submitted on: ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })}</p>
-        <p>Best regards,<br>U-Vend Registration System</p>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <p style="font-size: 16px; color: #1f2937; margin-bottom: 20px;">
+          This is the Registration of <strong>${personal.firstName} ${personal.lastName}</strong>
+        </p>
+        <p style="font-size: 14px; color: #6b7280;">
+          Please find the registration details attached as a PDF.
+        </p>
       </div>
     `
 
-    const officeEmailText = `
-New Registration Submission
-
-${customerName} has successfully registered with U-Vend.
-
-Registration Type: ${registrationType}
-
-Customer Details:
-- Name: ${customerName}
-- Email: ${personal.email}
-- Phone: ${personal.phone || 'Not provided'}
-- ID Number: ${personal.idNumber || 'Not provided'}
-
-Please find the complete registration details attached as a PDF. Please review and process this registration.
-
-Submitted on: ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })}
-    `.trim()
+    const officeEmailText = `This is the Registration of ${personal.firstName} ${personal.lastName}\n\nPlease find the registration details attached as a PDF.`
 
     // Send email to registration office
     const officeRecipients = [
@@ -232,13 +342,21 @@ Submitted on: ${new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesb
       'Ross@uvend.co.za'
     ]
     
-    await sendEmail(
+    const emailResult = await sendEmail(
       officeRecipients,
-      `${customerName} - New Registration Submission`,
+      `Registration of ${personal.firstName} ${personal.lastName}`,
       officeEmailHtml,
       officeEmailText,
       pdfAttachment
     )
+
+    // Log email result for debugging
+    if (!emailResult.success) {
+      console.error('Failed to send email to office:', emailResult.error)
+      // Don't throw - registration should still succeed even if email fails
+    } else {
+      console.log('Email sent successfully to office:', emailResult.messageId)
+    }
 
     // Email 2: Send confirmation to customer
     const customerEmailHtml = `
@@ -270,12 +388,20 @@ U-Vend Team
     `.trim()
 
     // Send confirmation email to customer
-    await sendEmail(
+    const customerEmailResult = await sendEmail(
       personal.email,
       'Registration Successful - U-Vend',
       customerEmailHtml,
       customerEmailText
     )
+
+    // Log customer email result for debugging
+    if (!customerEmailResult.success) {
+      console.error('Failed to send email to customer:', customerEmailResult.error)
+      // Don't throw - registration should still succeed even if email fails
+    } else {
+      console.log('Email sent successfully to customer:', customerEmailResult.messageId)
+    }
 
     return { 
       success: true, 
