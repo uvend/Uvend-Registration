@@ -203,6 +203,13 @@ const sendEmail = async (to: string | string[], subject: string, html: string, t
   }
 }
 
+// Helper to strip data URL prefix (e.g. data:application/pdf;base64,)
+const stripDataUrlPrefix = (data?: string | null) => {
+  if (!data) return null
+  const parts = data.split('base64,')
+  return parts.length > 1 ? parts[1] : data
+}
+
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
@@ -315,9 +322,36 @@ export default defineEventHandler(async (event) => {
     // Prepare PDF attachment if provided
     const pdfAttachment = pdfBase64 ? [{
       filename: `registration-summary-${personal.firstName}-${personal.lastName}-${new Date().toISOString().split('T')[0]}.pdf`,
-      content: pdfBase64.split('base64,')[1] || pdfBase64, // Remove data:application/pdf;base64, prefix if present
+      content: stripDataUrlPrefix(pdfBase64) || undefined,
       encoding: 'base64'
     }] : []
+
+    // Prepare original document attachments (PDFs/images) if base64 data is provided
+    const documentAttachments: any[] = []
+
+    if (documents && typeof documents === 'object') {
+      const pushDocAttachment = (doc: any, fallbackName: string) => {
+        if (!doc || !doc.base64) return
+        const base64Content = stripDataUrlPrefix(doc.base64)
+        if (!base64Content) return
+        documentAttachments.push({
+          filename: doc.name || fallbackName,
+          content: base64Content,
+          encoding: 'base64',
+          contentType: doc.type || undefined
+        })
+      }
+
+      pushDocAttachment((documents as any).idDocument, 'id-document.pdf')
+      pushDocAttachment((documents as any).proofOfAddress, 'proof-of-address.pdf')
+      pushDocAttachment((documents as any).bankStatement, 'bank-statement.pdf')
+
+      if (Array.isArray((documents as any).additionalDocuments)) {
+        ;(documents as any).additionalDocuments.forEach((doc: any, index: number) => {
+          pushDocAttachment(doc, `additional-document-${index + 1}.pdf`)
+        })
+      }
+    }
 
     const customerName = `${personal.firstName} ${personal.lastName}`
 
@@ -333,7 +367,7 @@ export default defineEventHandler(async (event) => {
       </div>
     `
 
-    const officeEmailText = `This is the Registration of ${personal.firstName} ${personal.lastName}\n\nPlease find the registration details attached as a PDF.`
+    const officeEmailText = `This is the Registration of ${personal.firstName} ${personal.lastName}\n\nPlease find the registration details attached as a PDF, along with copies of the original supporting documents.`
 
     // Send email to registration office
     const officeRecipients = [
@@ -347,7 +381,7 @@ export default defineEventHandler(async (event) => {
       `Registration of ${personal.firstName} ${personal.lastName}`,
       officeEmailHtml,
       officeEmailText,
-      pdfAttachment
+      [...pdfAttachment, ...documentAttachments]
     )
 
     // Log email result for debugging

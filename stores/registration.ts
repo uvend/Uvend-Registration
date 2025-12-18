@@ -11,9 +11,10 @@ export interface RegistrationFormData {
     dateOfBirth: string
   }
   documents: {
-    idDocument: File | null
-    proofOfAddress: File | null
-    additionalDocuments: File[]
+  idDocument: File | null
+  proofOfAddress: File | null
+  bankStatement: File | null
+  additionalDocuments: File[]
   }
   banking: {
     bankName: string
@@ -70,6 +71,7 @@ export const useRegistrationStore = defineStore('registration', {
       documents: {
         idDocument: null,
         proofOfAddress: null,
+        bankStatement: null,
         additionalDocuments: []
       },
       banking: {
@@ -162,9 +164,10 @@ export const useRegistrationStore = defineStore('registration', {
           dateOfBirth: ''
         },
         documents: {
-          idDocument: null,
-          proofOfAddress: null,
-          additionalDocuments: []
+        idDocument: null,
+        proofOfAddress: null,
+        bankStatement: null,
+        additionalDocuments: []
         },
         banking: {
           bankName: '',

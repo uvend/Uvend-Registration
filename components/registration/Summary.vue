@@ -572,35 +572,60 @@ const fileToDataURL = (file) => {
 
 const pdfToImage = async (pdfFile) => {
   try {
-    const pdfjsLib = await import('pdfjs-dist')
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
-    
+    // Dynamically import pdfjs-dist in a way that works across versions/builds
+    const pdfjsModule = await import('pdfjs-dist')
+    const pdfjsLib = pdfjsModule.default || pdfjsModule
+
+    const getDocument = pdfjsLib.getDocument || pdfjsModule.getDocument
+    const GlobalWorkerOptions = pdfjsLib.GlobalWorkerOptions || pdfjsModule.GlobalWorkerOptions
+    const version = pdfjsLib.version || pdfjsModule.version
+
+    if (!getDocument) {
+      console.warn('pdfjs-dist getDocument not available; skipping PDF thumbnail generation')
+      return null
+    }
+
+    // Configure worker source (explicit https to avoid mixed-content issues)
+    if (GlobalWorkerOptions) {
+      try {
+        GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.js`
+      } catch (e) {
+        console.warn('Unable to configure pdfjs workerSrc, continuing without explicit worker configuration', e)
+      }
+    }
+
     const arrayBuffer = await pdfFile.arrayBuffer()
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+    const pdf = await getDocument({ data: arrayBuffer }).promise
     const page = await pdf.getPage(1)
-    
+
     const viewport = page.getViewport({ scale: 2.0 })
     const canvas = document.createElement('canvas')
     const context = canvas.getContext('2d')
     canvas.height = viewport.height
     canvas.width = viewport.width
-    
+
     await page.render({ canvasContext: context, viewport }).promise
     return canvas.toDataURL('image/jpeg', 0.95)
   } catch (error) {
-    console.error('Error converting PDF to image:', error)
+    console.error('Error converting PDF to image (falling back to no preview):', error)
     return null
   }
 }
 
 const getDocumentImage = async (file) => {
   if (!file) return null
-  
-  if (file.type?.startsWith('image/')) {
+
+  const type = file.type || ''
+
+  if (type.startsWith('image/')) {
     return await fileToDataURL(file)
-  } else if (file.type === 'application/pdf') {
+  }
+
+  // Handle any PDF-like MIME types defensively
+  if (type === 'application/pdf' || type.includes('pdf')) {
     return await pdfToImage(file)
   }
+
   return null
 }
 
@@ -642,19 +667,19 @@ const createPDFContent = async () => {
             ${props.registrationData.documents?.idDocument ? `
               <div style="border: 1px solid #e5e7eb; padding: 15px; background-color: #f9fafb;">
                 <h3 style="color: #374151; font-size: 16px; margin-bottom: 10px;">ID Document: ${props.registrationData.documents.idDocument.name}</h3>
-                ${idDocImage ? `<img src="${idDocImage}" style="max-width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 4px;" />` : '<p style="color: #6b7280;">Document preview unavailable</p>'}
+                ${idDocImage ? `<img src="${idDocImage}" style="max-width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 4px;" />` : '<p style="color: #6b7280;">Document preview unavailable in summary. Original file is attached to this email.</p>'}
               </div>
             ` : ''}
             ${props.registrationData.documents?.proofOfAddress ? `
               <div style="border: 1px solid #e5e7eb; padding: 15px; background-color: #f9fafb;">
                 <h3 style="color: #374151; font-size: 16px; margin-bottom: 10px;">Proof of Address: ${props.registrationData.documents.proofOfAddress.name}</h3>
-                ${proofImage ? `<img src="${proofImage}" style="max-width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 4px;" />` : '<p style="color: #6b7280;">Document preview unavailable</p>'}
+                ${proofImage ? `<img src="${proofImage}" style="max-width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 4px;" />` : '<p style="color: #6b7280;">Document preview unavailable in summary. Original file is attached to this email.</p>'}
               </div>
             ` : ''}
             ${props.registrationData.documents?.bankStatement ? `
               <div style="border: 1px solid #e5e7eb; padding: 15px; background-color: #f9fafb;">
                 <h3 style="color: #374151; font-size: 16px; margin-bottom: 10px;">Bank Confirmation: ${props.registrationData.documents.bankStatement.name}</h3>
-                ${bankImage ? `<img src="${bankImage}" style="max-width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 4px;" />` : '<p style="color: #6b7280;">Document preview unavailable</p>'}
+                ${bankImage ? `<img src="${bankImage}" style="max-width: 100%; height: auto; border: 1px solid #d1d5db; border-radius: 4px;" />` : '<p style="color: #6b7280;">Document preview unavailable in summary. Original file is attached to this email.</p>'}
               </div>
             ` : ''}
           </div>

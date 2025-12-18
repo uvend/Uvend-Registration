@@ -226,6 +226,71 @@ const handleStepComplete = async () => {
     }
 }
 
+const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result)
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+    })
+}
+
+const buildDocumentsPayload = async () => {
+    const documentsPayload = {}
+
+    const addDoc = async (key, file) => {
+        if (!file) return
+        try {
+            const base64 = await fileToBase64(file)
+            documentsPayload[key] = {
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                base64
+            }
+        } catch (err) {
+            console.error(`Failed to read ${key} as base64:`, err)
+            // Fallback to metadata only if reading fails
+            documentsPayload[key] = {
+                name: file.name,
+                type: file.type,
+                size: file.size
+            }
+        }
+    }
+
+    if (formData.value.documents) {
+        await addDoc('idDocument', formData.value.documents.idDocument)
+        await addDoc('proofOfAddress', formData.value.documents.proofOfAddress)
+        await addDoc('bankStatement', formData.value.documents.bankStatement || null)
+
+        if (Array.isArray(formData.value.documents.additionalDocuments)) {
+            documentsPayload.additionalDocuments = []
+            for (const file of formData.value.documents.additionalDocuments) {
+                if (!file) continue
+                try {
+                    const base64 = await fileToBase64(file)
+                    documentsPayload.additionalDocuments.push({
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        base64
+                    })
+                } catch (err) {
+                    console.error('Failed to read additional document as base64:', err)
+                    documentsPayload.additionalDocuments.push({
+                        name: file.name,
+                        type: file.type,
+                        size: file.size
+                    })
+                }
+            }
+        }
+    }
+
+    return documentsPayload
+}
+
 const handleSubmit = async () => {
     try {
         // Generate PDF from Summary component
@@ -240,32 +305,8 @@ const handleSubmit = async () => {
             }
         }
 
-        // Extract document metadata (not File objects) to avoid serialization issues
-        const documentMetadata = {}
-        if (formData.value.documents?.idDocument) {
-            const doc = formData.value.documents.idDocument
-            documentMetadata.idDocument = {
-                name: doc.name,
-                type: doc.type,
-                size: doc.size
-            }
-        }
-        if (formData.value.documents?.proofOfAddress) {
-            const doc = formData.value.documents.proofOfAddress
-            documentMetadata.proofOfAddress = {
-                name: doc.name,
-                type: doc.type,
-                size: doc.size
-            }
-        }
-        if (formData.value.documents?.bankStatement) {
-            const doc = formData.value.documents.bankStatement
-            documentMetadata.bankStatement = {
-                name: doc.name,
-                type: doc.type,
-                size: doc.size
-            }
-        }
+        // Extract document metadata plus base64 content so originals can be emailed as attachments
+        const documentsPayload = await buildDocumentsPayload()
 
         const payload = {
             type: formData.value.type,
@@ -273,7 +314,7 @@ const handleSubmit = async () => {
             banking: formData.value.banking,
             address: formData.value.address,
             meters: formData.value.meters,
-            documents: documentMetadata,
+            documents: documentsPayload,
             pdfBase64: pdfBase64 // Include PDF if generated
         }
 

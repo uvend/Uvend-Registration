@@ -2378,6 +2378,11 @@ const sendEmail = async (to, subject, html, text, attachments) => {
     return { success: false, error: error.message, details: errorDetails };
   }
 };
+const stripDataUrlPrefix = (data) => {
+  if (!data) return null;
+  const parts = data.split("base64,");
+  return parts.length > 1 ? parts[1] : data;
+};
 const registration_post = defineEventHandler(async (event) => {
   var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
   try {
@@ -2489,10 +2494,32 @@ const registration_post = defineEventHandler(async (event) => {
     });
     const pdfAttachment = pdfBase64 ? [{
       filename: `registration-summary-${personal.firstName}-${personal.lastName}-${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}.pdf`,
-      content: pdfBase64.split("base64,")[1] || pdfBase64,
-      // Remove data:application/pdf;base64, prefix if present
+      content: stripDataUrlPrefix(pdfBase64) || void 0,
       encoding: "base64"
     }] : [];
+    const documentAttachments = [];
+    if (documents && typeof documents === "object") {
+      const pushDocAttachment = (doc, fallbackName) => {
+        if (!doc || !doc.base64) return;
+        const base64Content = stripDataUrlPrefix(doc.base64);
+        if (!base64Content) return;
+        documentAttachments.push({
+          filename: doc.name || fallbackName,
+          content: base64Content,
+          encoding: "base64",
+          contentType: doc.type || void 0
+        });
+      };
+      pushDocAttachment(documents.idDocument, "id-document.pdf");
+      pushDocAttachment(documents.proofOfAddress, "proof-of-address.pdf");
+      pushDocAttachment(documents.bankStatement, "bank-statement.pdf");
+      if (Array.isArray(documents.additionalDocuments)) {
+        ;
+        documents.additionalDocuments.forEach((doc, index) => {
+          pushDocAttachment(doc, `additional-document-${index + 1}.pdf`);
+        });
+      }
+    }
     const customerName = `${personal.firstName} ${personal.lastName}`;
     const officeEmailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -2506,7 +2533,7 @@ const registration_post = defineEventHandler(async (event) => {
     `;
     const officeEmailText = `This is the Registration of ${personal.firstName} ${personal.lastName}
 
-Please find the registration details attached as a PDF.`;
+Please find the registration details attached as a PDF, along with copies of the original supporting documents.`;
     const officeRecipients = [
       "registrations@uvend.co.za",
       "shawaal@uvend.co.za",
@@ -2517,7 +2544,7 @@ Please find the registration details attached as a PDF.`;
       `Registration of ${personal.firstName} ${personal.lastName}`,
       officeEmailHtml,
       officeEmailText,
-      pdfAttachment
+      [...pdfAttachment, ...documentAttachments]
     );
     if (!emailResult.success) {
       console.error("Failed to send email to office:", emailResult.error);
