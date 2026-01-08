@@ -210,6 +210,265 @@ const stripDataUrlPrefix = (data?: string | null) => {
   return parts.length > 1 ? parts[1] : data
 }
 
+const escapeHtml = (value: any) => {
+  const s = value === null || value === undefined ? '' : String(value)
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+const formatDate = (dateString?: string | null) => {
+  if (!dateString) return 'Not provided'
+  const d = new Date(dateString)
+  if (Number.isNaN(d.getTime())) return escapeHtml(dateString)
+  try {
+    return d.toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' })
+  } catch {
+    return escapeHtml(dateString)
+  }
+}
+
+const formatDateText = (dateString?: string | null) => {
+  if (!dateString) return 'Not provided'
+  const d = new Date(dateString)
+  if (Number.isNaN(d.getTime())) return String(dateString)
+  try {
+    return d.toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' })
+  } catch {
+    return String(dateString)
+  }
+}
+
+const getRegistrationTypeLabel = (type: string) => {
+  const types: Record<string, string> = {
+    new: 'New Registration',
+    update: 'Update Details',
+    existing: 'Existing Registration'
+  }
+  return types[type] || type
+}
+
+const getAccountTypeLabel = (type: string) => {
+  const types: Record<string, string> = {
+    savings: 'Savings',
+    current: 'Current/Cheque',
+    transmission: 'Transmission'
+  }
+  return types[type] || type
+}
+
+const buildRegistrationDetailsEmail = (payload: {
+  type: string
+  personal: any
+  banking: any
+  address: any
+  meters: any[]
+  documents: any
+}) => {
+  const { type, personal = {}, banking = {}, address = {}, meters = [], documents = {} } = payload
+  const generatedOn = new Date().toLocaleString('en-ZA')
+
+  const docName = (doc: any) => (doc?.name ? escapeHtml(doc.name) : 'Not provided')
+
+  const complexesHtml =
+    Array.isArray(address?.complexes) && address.complexes.length
+      ? address.complexes
+          .map((c: any, idx: number) => {
+            return `
+              <div style="padding: 10px 0; border-top: 1px solid #e5e7eb;">
+                <div style="font-weight: 600; color: #111827; margin-bottom: 6px;">Complex ${idx + 1}</div>
+                <div><strong>Name:</strong> ${escapeHtml(c?.name || 'Not provided')}</div>
+                <div><strong>Number of Units:</strong> ${escapeHtml(c?.unitCount ?? 'Not provided')}</div>
+                <div><strong>Address:</strong> ${escapeHtml(c?.address || 'Not provided')}</div>
+              </div>
+            `
+          })
+          .join('')
+      : `<div style="color: #6b7280;">No complexes added</div>`
+
+  const metersHtml =
+    Array.isArray(meters) && meters.length
+      ? meters
+          .map((m: any, idx: number) => {
+            const unit = m?.unit || {}
+            const tenant = unit?.tenant || {}
+            const tenantHtml =
+              unit?.hasTenant
+                ? `
+                  <div style="margin-top: 10px; padding: 10px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px;">
+                    <div style="font-weight: 600; color: #111827; margin-bottom: 6px;">Tenant Information</div>
+                    <div><strong>Name:</strong> ${escapeHtml(tenant?.name || 'Not provided')}</div>
+                    <div><strong>Phone:</strong> ${escapeHtml(tenant?.phone || 'Not provided')}</div>
+                    <div><strong>Email:</strong> ${escapeHtml(tenant?.email || 'Not provided')}</div>
+                    <div><strong>Lease Period:</strong> ${formatDate(tenant?.leaseStart)} - ${formatDate(tenant?.leaseEnd)}</div>
+                  </div>
+                `
+                : ''
+
+            return `
+              <div style="padding: 14px 0; border-top: 1px solid #e5e7eb;">
+                <div style="font-weight: 700; color: #111827; margin-bottom: 8px;">Meter ${idx + 1}</div>
+                <div><strong>Meter Number:</strong> ${escapeHtml(m?.meterNumber || 'Not provided')}</div>
+                <div><strong>Utility Type:</strong> ${escapeHtml(m?.utilityType || 'Not provided')}</div>
+                <div><strong>Location:</strong> ${escapeHtml(m?.location || 'Not provided')}</div>
+                <div><strong>Status:</strong> ${m?.isActive === false ? 'Inactive' : 'Active'}</div>
+                <div style="margin-top: 10px; padding: 10px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px;">
+                  <div style="font-weight: 600; color: #111827; margin-bottom: 6px;">Unit Details</div>
+                  <div><strong>Unit Number:</strong> ${escapeHtml(unit?.unitNumber || 'Not provided')}</div>
+                  <div><strong>Unit Type:</strong> ${escapeHtml(unit?.unitType || 'Not provided')}</div>
+                </div>
+                ${tenantHtml}
+              </div>
+            `
+          })
+          .join('')
+      : `<div style="color: #6b7280;">No meters added</div>`
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 720px; margin: 0 auto; padding: 20px; color: #111827;">
+      <h1 style="color: #1e40af; font-size: 26px; margin: 0 0 6px 0;">Registration Summary</h1>
+      <div style="color: #6b7280; font-size: 12px; margin-bottom: 18px;">Generated on ${escapeHtml(generatedOn)}</div>
+
+      <div style="padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 14px;">
+        <h2 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">Registration Type</h2>
+        <div><strong>Type:</strong> ${escapeHtml(getRegistrationTypeLabel(type) || 'Not provided')}</div>
+      </div>
+
+      <div style="padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 14px;">
+        <h2 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">Personal Information</h2>
+        <div><strong>First Name:</strong> ${escapeHtml(personal?.firstName || 'Not provided')}</div>
+        <div><strong>Last Name:</strong> ${escapeHtml(personal?.lastName || 'Not provided')}</div>
+        <div><strong>Email Address:</strong> ${escapeHtml(personal?.email || 'Not provided')}</div>
+        <div><strong>Phone Number:</strong> ${escapeHtml(personal?.phone || 'Not provided')}</div>
+        <div><strong>ID Number:</strong> ${escapeHtml(personal?.idNumber || 'Not provided')}</div>
+        <div><strong>Date of Birth:</strong> ${formatDate(personal?.dateOfBirth)}</div>
+      </div>
+
+      <div style="padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 14px;">
+        <h2 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">Documents</h2>
+        <div><strong>ID Document:</strong> ${docName((documents as any)?.idDocument)}</div>
+        <div><strong>Proof of Address:</strong> ${docName((documents as any)?.proofOfAddress)}</div>
+        <div><strong>Bank Confirmation:</strong> ${docName((documents as any)?.bankStatement)}</div>
+        ${
+          Array.isArray((documents as any)?.additionalDocuments) && (documents as any).additionalDocuments.length
+            ? `<div style="margin-top: 10px;"><strong>Additional Documents:</strong><ul style="margin: 6px 0 0 18px; padding: 0;">${(documents as any).additionalDocuments
+                .map((d: any) => `<li>${docName(d)}</li>`)
+                .join('')}</ul></div>`
+            : ''
+        }
+      </div>
+
+      <div style="padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 14px;">
+        <h2 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">Banking Details</h2>
+        <div><strong>Account Holder:</strong> ${escapeHtml(banking?.accountHolder || 'Not provided')}</div>
+        <div><strong>Bank Name:</strong> ${escapeHtml(banking?.bankName || 'Not provided')}</div>
+        <div><strong>Account Type:</strong> ${escapeHtml(banking?.accountType ? getAccountTypeLabel(banking.accountType) : 'Not provided')}</div>
+        <div><strong>Branch Code:</strong> ${escapeHtml(banking?.branchCode || 'Not provided')}</div>
+        <div><strong>Account Number:</strong> ${escapeHtml(banking?.accountNumber || 'Not provided')}</div>
+      </div>
+
+      <div style="padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 14px;">
+        <h2 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">Address Details</h2>
+        <div style="font-weight: 600; color: #111827; margin: 8px 0;">Main Business Address</div>
+        <div><strong>Street Address:</strong> ${escapeHtml(address?.streetAddress || 'Not provided')}</div>
+        <div><strong>Suburb:</strong> ${escapeHtml(address?.suburb || 'Not provided')}</div>
+        <div><strong>City:</strong> ${escapeHtml(address?.city || 'Not provided')}</div>
+        <div><strong>Province:</strong> ${escapeHtml(address?.province || 'Not provided')}</div>
+        <div><strong>Postal Code:</strong> ${escapeHtml(address?.postalCode || 'Not provided')}</div>
+
+        <div style="font-weight: 600; color: #111827; margin: 12px 0 6px 0;">Complexes</div>
+        ${complexesHtml}
+      </div>
+
+      <div style="padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 6px;">
+        <h2 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">Meter & Unit Details</h2>
+        ${metersHtml}
+      </div>
+    </div>
+  `
+
+  const textLines: string[] = []
+  textLines.push('Registration Summary')
+  textLines.push(`Generated on: ${generatedOn}`)
+  textLines.push('')
+  textLines.push('Registration Type')
+  textLines.push(`- Type: ${getRegistrationTypeLabel(type) || 'Not provided'}`)
+  textLines.push('')
+  textLines.push('Personal Information')
+  textLines.push(`- First Name: ${personal?.firstName || 'Not provided'}`)
+  textLines.push(`- Last Name: ${personal?.lastName || 'Not provided'}`)
+  textLines.push(`- Email Address: ${personal?.email || 'Not provided'}`)
+  textLines.push(`- Phone Number: ${personal?.phone || 'Not provided'}`)
+  textLines.push(`- ID Number: ${personal?.idNumber || 'Not provided'}`)
+  textLines.push(`- Date of Birth: ${formatDateText(personal?.dateOfBirth)}`)
+  textLines.push('')
+  textLines.push('Documents')
+  textLines.push(`- ID Document: ${documents?.idDocument?.name || 'Not provided'}`)
+  textLines.push(`- Proof of Address: ${documents?.proofOfAddress?.name || 'Not provided'}`)
+  textLines.push(`- Bank Confirmation: ${documents?.bankStatement?.name || 'Not provided'}`)
+  if (Array.isArray(documents?.additionalDocuments) && documents.additionalDocuments.length) {
+    textLines.push('- Additional Documents:')
+    documents.additionalDocuments.forEach((d: any, idx: number) => {
+      textLines.push(`  - ${idx + 1}. ${d?.name || 'Not provided'}`)
+    })
+  }
+  textLines.push('')
+  textLines.push('Banking Details')
+  textLines.push(`- Account Holder: ${banking?.accountHolder || 'Not provided'}`)
+  textLines.push(`- Bank Name: ${banking?.bankName || 'Not provided'}`)
+  textLines.push(`- Account Type: ${banking?.accountType ? getAccountTypeLabel(banking.accountType) : 'Not provided'}`)
+  textLines.push(`- Branch Code: ${banking?.branchCode || 'Not provided'}`)
+  textLines.push(`- Account Number: ${banking?.accountNumber || 'Not provided'}`)
+  textLines.push('')
+  textLines.push('Address Details')
+  textLines.push('- Main Business Address')
+  textLines.push(`  - Street Address: ${address?.streetAddress || 'Not provided'}`)
+  textLines.push(`  - Suburb: ${address?.suburb || 'Not provided'}`)
+  textLines.push(`  - City: ${address?.city || 'Not provided'}`)
+  textLines.push(`  - Province: ${address?.province || 'Not provided'}`)
+  textLines.push(`  - Postal Code: ${address?.postalCode || 'Not provided'}`)
+  textLines.push('- Complexes')
+  if (Array.isArray(address?.complexes) && address.complexes.length) {
+    address.complexes.forEach((c: any, idx: number) => {
+      textLines.push(`  - Complex ${idx + 1}:`)
+      textLines.push(`    - Name: ${c?.name || 'Not provided'}`)
+      textLines.push(`    - Number of Units: ${c?.unitCount ?? 'Not provided'}`)
+      textLines.push(`    - Address: ${c?.address || 'Not provided'}`)
+    })
+  } else {
+    textLines.push('  - No complexes added')
+  }
+  textLines.push('')
+  textLines.push('Meter & Unit Details')
+  if (Array.isArray(meters) && meters.length) {
+    meters.forEach((m: any, idx: number) => {
+      const unit = m?.unit || {}
+      const tenant = unit?.tenant || {}
+      textLines.push(`- Meter ${idx + 1}:`)
+      textLines.push(`  - Meter Number: ${m?.meterNumber || 'Not provided'}`)
+      textLines.push(`  - Utility Type: ${m?.utilityType || 'Not provided'}`)
+      textLines.push(`  - Location: ${m?.location || 'Not provided'}`)
+      textLines.push(`  - Status: ${m?.isActive === false ? 'Inactive' : 'Active'}`)
+      textLines.push(`  - Unit Number: ${unit?.unitNumber || 'Not provided'}`)
+      textLines.push(`  - Unit Type: ${unit?.unitType || 'Not provided'}`)
+      if (unit?.hasTenant) {
+        textLines.push('  - Tenant Information:')
+        textLines.push(`    - Name: ${tenant?.name || 'Not provided'}`)
+        textLines.push(`    - Phone: ${tenant?.phone || 'Not provided'}`)
+        textLines.push(`    - Email: ${tenant?.email || 'Not provided'}`)
+        textLines.push(`    - Lease Period: ${formatDateText(tenant?.leaseStart)} - ${formatDateText(tenant?.leaseEnd)}`)
+      }
+    })
+  } else {
+    textLines.push('- No meters added')
+  }
+
+  return { html, text: textLines.join('\n') }
+}
+
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
@@ -319,13 +578,6 @@ export default defineEventHandler(async (event) => {
       }
     })
 
-    // Prepare PDF attachment if provided
-    const pdfAttachment = pdfBase64 ? [{
-      filename: `registration-summary-${personal.firstName}-${personal.lastName}-${new Date().toISOString().split('T')[0]}.pdf`,
-      content: stripDataUrlPrefix(pdfBase64) || undefined,
-      encoding: 'base64'
-    }] : []
-
     // Prepare original document attachments (PDFs/images) if base64 data is provided
     const documentAttachments: any[] = []
 
@@ -355,19 +607,15 @@ export default defineEventHandler(async (event) => {
 
     const customerName = `${personal.firstName} ${personal.lastName}`
 
-    // Simple email template as requested
-    const officeEmailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <p style="font-size: 16px; color: #1f2937; margin-bottom: 20px;">
-          This is the Registration of <strong>${personal.firstName} ${personal.lastName}</strong>
-        </p>
-        <p style="font-size: 14px; color: #6b7280;">
-          Please find the registration details attached as a PDF.
-        </p>
-      </div>
-    `
-
-    const officeEmailText = `This is the Registration of ${personal.firstName} ${personal.lastName}\n\nPlease find the registration details attached as a PDF, along with copies of the original supporting documents.`
+    // Office email: include full registration details in the email body (no generated PDF attachment)
+    const { html: officeEmailHtml, text: officeEmailText } = buildRegistrationDetailsEmail({
+      type,
+      personal,
+      banking,
+      address,
+      meters,
+      documents
+    })
 
     // Send email to registration office
     const officeRecipients = [
@@ -381,7 +629,7 @@ export default defineEventHandler(async (event) => {
       `Registration of ${personal.firstName} ${personal.lastName}`,
       officeEmailHtml,
       officeEmailText,
-      [...pdfAttachment, ...documentAttachments]
+      [...documentAttachments]
     )
 
     // Log email result for debugging

@@ -4,7 +4,7 @@ import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
 import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, readMultipartFormData, getResponseStatusText } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/h3/dist/index.mjs';
-import { escapeHtml } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/@vue/shared/dist/shared.cjs.js';
+import { escapeHtml as escapeHtml$1 } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/@vue/shared/dist/shared.cjs.js';
 import { PrismaClient } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/@prisma/client/default.js';
 import nodemailer from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/nodemailer/lib/nodemailer.js';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://C:/Users/Ross/OneDrive/Documents/UvendRegistrationfinal/Uvend-Registration/node_modules/vue-bundle-renderer/dist/runtime.mjs';
@@ -2187,7 +2187,7 @@ async function shutdown() {
 const _messages = { "appName": "Nuxt", "statusCode": 500, "statusMessage": "Internal server error", "description": "This page is temporarily unavailable.", "refresh": "Refresh this page" };
 const template$1 = (messages) => {
   messages = { ..._messages, ...messages };
-  return '<!DOCTYPE html><html lang="en"><head><title>' + escapeHtml(messages.statusCode) + " - " + escapeHtml(messages.statusMessage) + " | " + escapeHtml(messages.appName) + `</title><meta charset="utf-8"><meta content="width=device-width,initial-scale=1.0,minimum-scale=1.0" name="viewport"><script>!function(){const e=document.createElement("link").relList;if(!(e&&e.supports&&e.supports("modulepreload"))){for(const e of document.querySelectorAll('link[rel="modulepreload"]'))r(e);new MutationObserver(e=>{for(const o of e)if("childList"===o.type)for(const e of o.addedNodes)"LINK"===e.tagName&&"modulepreload"===e.rel&&r(e)}).observe(document,{childList:!0,subtree:!0})}function r(e){if(e.ep)return;e.ep=!0;const r=function(e){const r={};return e.integrity&&(r.integrity=e.integrity),e.referrerPolicy&&(r.referrerPolicy=e.referrerPolicy),"use-credentials"===e.crossOrigin?r.credentials="include":"anonymous"===e.crossOrigin?r.credentials="omit":r.credentials="same-origin",r}(e);fetch(e.href,r)}}();<\/script><style>*,:after,:before{border-color:var(--un-default-border-color,#e5e7eb);border-style:solid;border-width:0;box-sizing:border-box}:after,:before{--un-content:""}html{line-height:1.5;-webkit-text-size-adjust:100%;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-moz-tab-size:4;tab-size:4;-webkit-tap-highlight-color:transparent}body{line-height:inherit;margin:0}h1,h2{font-size:inherit;font-weight:inherit}h1,h2,p{margin:0}*,:after,:before{--un-rotate:0;--un-rotate-x:0;--un-rotate-y:0;--un-rotate-z:0;--un-scale-x:1;--un-scale-y:1;--un-scale-z:1;--un-skew-x:0;--un-skew-y:0;--un-translate-x:0;--un-translate-y:0;--un-translate-z:0;--un-pan-x: ;--un-pan-y: ;--un-pinch-zoom: ;--un-scroll-snap-strictness:proximity;--un-ordinal: ;--un-slashed-zero: ;--un-numeric-figure: ;--un-numeric-spacing: ;--un-numeric-fraction: ;--un-border-spacing-x:0;--un-border-spacing-y:0;--un-ring-offset-shadow:0 0 transparent;--un-ring-shadow:0 0 transparent;--un-shadow-inset: ;--un-shadow:0 0 transparent;--un-ring-inset: ;--un-ring-offset-width:0px;--un-ring-offset-color:#fff;--un-ring-width:0px;--un-ring-color:rgba(147,197,253,.5);--un-blur: ;--un-brightness: ;--un-contrast: ;--un-drop-shadow: ;--un-grayscale: ;--un-hue-rotate: ;--un-invert: ;--un-saturate: ;--un-sepia: ;--un-backdrop-blur: ;--un-backdrop-brightness: ;--un-backdrop-contrast: ;--un-backdrop-grayscale: ;--un-backdrop-hue-rotate: ;--un-backdrop-invert: ;--un-backdrop-opacity: ;--un-backdrop-saturate: ;--un-backdrop-sepia: }.grid{display:grid}.mb-2{margin-bottom:.5rem}.mb-4{margin-bottom:1rem}.max-w-520px{max-width:520px}.min-h-screen{min-height:100vh}.place-content-center{place-content:center}.overflow-hidden{overflow:hidden}.bg-white{--un-bg-opacity:1;background-color:rgb(255 255 255/var(--un-bg-opacity))}.px-2{padding-left:.5rem;padding-right:.5rem}.text-center{text-align:center}.text-\\[80px\\]{font-size:80px}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\\[\\#020420\\]{--un-text-opacity:1;color:rgb(2 4 32/var(--un-text-opacity))}.text-\\[\\#64748B\\]{--un-text-opacity:1;color:rgb(100 116 139/var(--un-text-opacity))}.font-semibold{font-weight:600}.leading-none{line-height:1}.tracking-wide{letter-spacing:.025em}.font-sans{font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji}.tabular-nums{--un-numeric-spacing:tabular-nums;font-variant-numeric:var(--un-ordinal) var(--un-slashed-zero) var(--un-numeric-figure) var(--un-numeric-spacing) var(--un-numeric-fraction)}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}@media(prefers-color-scheme:dark){.dark\\:bg-\\[\\#020420\\]{--un-bg-opacity:1;background-color:rgb(2 4 32/var(--un-bg-opacity))}.dark\\:text-white{--un-text-opacity:1;color:rgb(255 255 255/var(--un-text-opacity))}}@media(min-width:640px){.sm\\:text-\\[110px\\]{font-size:110px}.sm\\:text-3xl{font-size:1.875rem;line-height:2.25rem}}</style></head><body class="antialiased bg-white dark:bg-[#020420] dark:text-white font-sans grid min-h-screen overflow-hidden place-content-center text-[#020420] tracking-wide"><div class="max-w-520px text-center"><h1 class="font-semibold leading-none mb-4 sm:text-[110px] tabular-nums text-[80px]">` + escapeHtml(messages.statusCode) + '</h1><h2 class="font-semibold mb-2 sm:text-3xl text-2xl">' + escapeHtml(messages.statusMessage) + '</h2><p class="mb-4 px-2 text-[#64748B] text-md">' + escapeHtml(messages.description) + "</p></div></body></html>";
+  return '<!DOCTYPE html><html lang="en"><head><title>' + escapeHtml$1(messages.statusCode) + " - " + escapeHtml$1(messages.statusMessage) + " | " + escapeHtml$1(messages.appName) + `</title><meta charset="utf-8"><meta content="width=device-width,initial-scale=1.0,minimum-scale=1.0" name="viewport"><script>!function(){const e=document.createElement("link").relList;if(!(e&&e.supports&&e.supports("modulepreload"))){for(const e of document.querySelectorAll('link[rel="modulepreload"]'))r(e);new MutationObserver(e=>{for(const o of e)if("childList"===o.type)for(const e of o.addedNodes)"LINK"===e.tagName&&"modulepreload"===e.rel&&r(e)}).observe(document,{childList:!0,subtree:!0})}function r(e){if(e.ep)return;e.ep=!0;const r=function(e){const r={};return e.integrity&&(r.integrity=e.integrity),e.referrerPolicy&&(r.referrerPolicy=e.referrerPolicy),"use-credentials"===e.crossOrigin?r.credentials="include":"anonymous"===e.crossOrigin?r.credentials="omit":r.credentials="same-origin",r}(e);fetch(e.href,r)}}();<\/script><style>*,:after,:before{border-color:var(--un-default-border-color,#e5e7eb);border-style:solid;border-width:0;box-sizing:border-box}:after,:before{--un-content:""}html{line-height:1.5;-webkit-text-size-adjust:100%;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-moz-tab-size:4;tab-size:4;-webkit-tap-highlight-color:transparent}body{line-height:inherit;margin:0}h1,h2{font-size:inherit;font-weight:inherit}h1,h2,p{margin:0}*,:after,:before{--un-rotate:0;--un-rotate-x:0;--un-rotate-y:0;--un-rotate-z:0;--un-scale-x:1;--un-scale-y:1;--un-scale-z:1;--un-skew-x:0;--un-skew-y:0;--un-translate-x:0;--un-translate-y:0;--un-translate-z:0;--un-pan-x: ;--un-pan-y: ;--un-pinch-zoom: ;--un-scroll-snap-strictness:proximity;--un-ordinal: ;--un-slashed-zero: ;--un-numeric-figure: ;--un-numeric-spacing: ;--un-numeric-fraction: ;--un-border-spacing-x:0;--un-border-spacing-y:0;--un-ring-offset-shadow:0 0 transparent;--un-ring-shadow:0 0 transparent;--un-shadow-inset: ;--un-shadow:0 0 transparent;--un-ring-inset: ;--un-ring-offset-width:0px;--un-ring-offset-color:#fff;--un-ring-width:0px;--un-ring-color:rgba(147,197,253,.5);--un-blur: ;--un-brightness: ;--un-contrast: ;--un-drop-shadow: ;--un-grayscale: ;--un-hue-rotate: ;--un-invert: ;--un-saturate: ;--un-sepia: ;--un-backdrop-blur: ;--un-backdrop-brightness: ;--un-backdrop-contrast: ;--un-backdrop-grayscale: ;--un-backdrop-hue-rotate: ;--un-backdrop-invert: ;--un-backdrop-opacity: ;--un-backdrop-saturate: ;--un-backdrop-sepia: }.grid{display:grid}.mb-2{margin-bottom:.5rem}.mb-4{margin-bottom:1rem}.max-w-520px{max-width:520px}.min-h-screen{min-height:100vh}.place-content-center{place-content:center}.overflow-hidden{overflow:hidden}.bg-white{--un-bg-opacity:1;background-color:rgb(255 255 255/var(--un-bg-opacity))}.px-2{padding-left:.5rem;padding-right:.5rem}.text-center{text-align:center}.text-\\[80px\\]{font-size:80px}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\\[\\#020420\\]{--un-text-opacity:1;color:rgb(2 4 32/var(--un-text-opacity))}.text-\\[\\#64748B\\]{--un-text-opacity:1;color:rgb(100 116 139/var(--un-text-opacity))}.font-semibold{font-weight:600}.leading-none{line-height:1}.tracking-wide{letter-spacing:.025em}.font-sans{font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji}.tabular-nums{--un-numeric-spacing:tabular-nums;font-variant-numeric:var(--un-ordinal) var(--un-slashed-zero) var(--un-numeric-figure) var(--un-numeric-spacing) var(--un-numeric-fraction)}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}@media(prefers-color-scheme:dark){.dark\\:bg-\\[\\#020420\\]{--un-bg-opacity:1;background-color:rgb(2 4 32/var(--un-bg-opacity))}.dark\\:text-white{--un-text-opacity:1;color:rgb(255 255 255/var(--un-text-opacity))}}@media(min-width:640px){.sm\\:text-\\[110px\\]{font-size:110px}.sm\\:text-3xl{font-size:1.875rem;line-height:2.25rem}}</style></head><body class="antialiased bg-white dark:bg-[#020420] dark:text-white font-sans grid min-h-screen overflow-hidden place-content-center text-[#020420] tracking-wide"><div class="max-w-520px text-center"><h1 class="font-semibold leading-none mb-4 sm:text-[110px] tabular-nums text-[80px]">` + escapeHtml$1(messages.statusCode) + '</h1><h2 class="font-semibold mb-2 sm:text-3xl text-2xl">' + escapeHtml$1(messages.statusMessage) + '</h2><p class="mb-4 px-2 text-[#64748B] text-md">' + escapeHtml$1(messages.description) + "</p></div></body></html>";
 };
 
 const error500 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
@@ -2383,6 +2383,224 @@ const stripDataUrlPrefix = (data) => {
   const parts = data.split("base64,");
   return parts.length > 1 ? parts[1] : data;
 };
+const escapeHtml = (value) => {
+  const s = value === null || value === void 0 ? "" : String(value);
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+};
+const formatDate = (dateString) => {
+  if (!dateString) return "Not provided";
+  const d = new Date(dateString);
+  if (Number.isNaN(d.getTime())) return escapeHtml(dateString);
+  try {
+    return d.toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" });
+  } catch {
+    return escapeHtml(dateString);
+  }
+};
+const formatDateText = (dateString) => {
+  if (!dateString) return "Not provided";
+  const d = new Date(dateString);
+  if (Number.isNaN(d.getTime())) return String(dateString);
+  try {
+    return d.toLocaleDateString("en-ZA", { year: "numeric", month: "short", day: "numeric" });
+  } catch {
+    return String(dateString);
+  }
+};
+const getRegistrationTypeLabel = (type) => {
+  const types = {
+    new: "New Registration",
+    update: "Update Details",
+    existing: "Existing Registration"
+  };
+  return types[type] || type;
+};
+const getAccountTypeLabel = (type) => {
+  const types = {
+    savings: "Savings",
+    current: "Current/Cheque",
+    transmission: "Transmission"
+  };
+  return types[type] || type;
+};
+const buildRegistrationDetailsEmail = (payload) => {
+  var _a, _b, _c;
+  const { type, personal = {}, banking = {}, address = {}, meters = [], documents = {} } = payload;
+  const generatedOn = (/* @__PURE__ */ new Date()).toLocaleString("en-ZA");
+  const docName = (doc) => (doc == null ? void 0 : doc.name) ? escapeHtml(doc.name) : "Not provided";
+  const complexesHtml = Array.isArray(address == null ? void 0 : address.complexes) && address.complexes.length ? address.complexes.map((c, idx) => {
+    var _a2;
+    return `
+              <div style="padding: 10px 0; border-top: 1px solid #e5e7eb;">
+                <div style="font-weight: 600; color: #111827; margin-bottom: 6px;">Complex ${idx + 1}</div>
+                <div><strong>Name:</strong> ${escapeHtml((c == null ? void 0 : c.name) || "Not provided")}</div>
+                <div><strong>Number of Units:</strong> ${escapeHtml((_a2 = c == null ? void 0 : c.unitCount) != null ? _a2 : "Not provided")}</div>
+                <div><strong>Address:</strong> ${escapeHtml((c == null ? void 0 : c.address) || "Not provided")}</div>
+              </div>
+            `;
+  }).join("") : `<div style="color: #6b7280;">No complexes added</div>`;
+  const metersHtml = Array.isArray(meters) && meters.length ? meters.map((m, idx) => {
+    const unit = (m == null ? void 0 : m.unit) || {};
+    const tenant = (unit == null ? void 0 : unit.tenant) || {};
+    const tenantHtml = (unit == null ? void 0 : unit.hasTenant) ? `
+                  <div style="margin-top: 10px; padding: 10px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px;">
+                    <div style="font-weight: 600; color: #111827; margin-bottom: 6px;">Tenant Information</div>
+                    <div><strong>Name:</strong> ${escapeHtml((tenant == null ? void 0 : tenant.name) || "Not provided")}</div>
+                    <div><strong>Phone:</strong> ${escapeHtml((tenant == null ? void 0 : tenant.phone) || "Not provided")}</div>
+                    <div><strong>Email:</strong> ${escapeHtml((tenant == null ? void 0 : tenant.email) || "Not provided")}</div>
+                    <div><strong>Lease Period:</strong> ${formatDate(tenant == null ? void 0 : tenant.leaseStart)} - ${formatDate(tenant == null ? void 0 : tenant.leaseEnd)}</div>
+                  </div>
+                ` : "";
+    return `
+              <div style="padding: 14px 0; border-top: 1px solid #e5e7eb;">
+                <div style="font-weight: 700; color: #111827; margin-bottom: 8px;">Meter ${idx + 1}</div>
+                <div><strong>Meter Number:</strong> ${escapeHtml((m == null ? void 0 : m.meterNumber) || "Not provided")}</div>
+                <div><strong>Utility Type:</strong> ${escapeHtml((m == null ? void 0 : m.utilityType) || "Not provided")}</div>
+                <div><strong>Location:</strong> ${escapeHtml((m == null ? void 0 : m.location) || "Not provided")}</div>
+                <div><strong>Status:</strong> ${(m == null ? void 0 : m.isActive) === false ? "Inactive" : "Active"}</div>
+                <div style="margin-top: 10px; padding: 10px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px;">
+                  <div style="font-weight: 600; color: #111827; margin-bottom: 6px;">Unit Details</div>
+                  <div><strong>Unit Number:</strong> ${escapeHtml((unit == null ? void 0 : unit.unitNumber) || "Not provided")}</div>
+                  <div><strong>Unit Type:</strong> ${escapeHtml((unit == null ? void 0 : unit.unitType) || "Not provided")}</div>
+                </div>
+                ${tenantHtml}
+              </div>
+            `;
+  }).join("") : `<div style="color: #6b7280;">No meters added</div>`;
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 720px; margin: 0 auto; padding: 20px; color: #111827;">
+      <h1 style="color: #1e40af; font-size: 26px; margin: 0 0 6px 0;">Registration Summary</h1>
+      <div style="color: #6b7280; font-size: 12px; margin-bottom: 18px;">Generated on ${escapeHtml(generatedOn)}</div>
+
+      <div style="padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 14px;">
+        <h2 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">Registration Type</h2>
+        <div><strong>Type:</strong> ${escapeHtml(getRegistrationTypeLabel(type) || "Not provided")}</div>
+      </div>
+
+      <div style="padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 14px;">
+        <h2 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">Personal Information</h2>
+        <div><strong>First Name:</strong> ${escapeHtml((personal == null ? void 0 : personal.firstName) || "Not provided")}</div>
+        <div><strong>Last Name:</strong> ${escapeHtml((personal == null ? void 0 : personal.lastName) || "Not provided")}</div>
+        <div><strong>Email Address:</strong> ${escapeHtml((personal == null ? void 0 : personal.email) || "Not provided")}</div>
+        <div><strong>Phone Number:</strong> ${escapeHtml((personal == null ? void 0 : personal.phone) || "Not provided")}</div>
+        <div><strong>ID Number:</strong> ${escapeHtml((personal == null ? void 0 : personal.idNumber) || "Not provided")}</div>
+        <div><strong>Date of Birth:</strong> ${formatDate(personal == null ? void 0 : personal.dateOfBirth)}</div>
+      </div>
+
+      <div style="padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 14px;">
+        <h2 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">Documents</h2>
+        <div><strong>ID Document:</strong> ${docName(documents == null ? void 0 : documents.idDocument)}</div>
+        <div><strong>Proof of Address:</strong> ${docName(documents == null ? void 0 : documents.proofOfAddress)}</div>
+        <div><strong>Bank Confirmation:</strong> ${docName(documents == null ? void 0 : documents.bankStatement)}</div>
+        ${Array.isArray(documents == null ? void 0 : documents.additionalDocuments) && documents.additionalDocuments.length ? `<div style="margin-top: 10px;"><strong>Additional Documents:</strong><ul style="margin: 6px 0 0 18px; padding: 0;">${documents.additionalDocuments.map((d) => `<li>${docName(d)}</li>`).join("")}</ul></div>` : ""}
+      </div>
+
+      <div style="padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 14px;">
+        <h2 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">Banking Details</h2>
+        <div><strong>Account Holder:</strong> ${escapeHtml((banking == null ? void 0 : banking.accountHolder) || "Not provided")}</div>
+        <div><strong>Bank Name:</strong> ${escapeHtml((banking == null ? void 0 : banking.bankName) || "Not provided")}</div>
+        <div><strong>Account Type:</strong> ${escapeHtml((banking == null ? void 0 : banking.accountType) ? getAccountTypeLabel(banking.accountType) : "Not provided")}</div>
+        <div><strong>Branch Code:</strong> ${escapeHtml((banking == null ? void 0 : banking.branchCode) || "Not provided")}</div>
+        <div><strong>Account Number:</strong> ${escapeHtml((banking == null ? void 0 : banking.accountNumber) || "Not provided")}</div>
+      </div>
+
+      <div style="padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 14px;">
+        <h2 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">Address Details</h2>
+        <div style="font-weight: 600; color: #111827; margin: 8px 0;">Main Business Address</div>
+        <div><strong>Street Address:</strong> ${escapeHtml((address == null ? void 0 : address.streetAddress) || "Not provided")}</div>
+        <div><strong>Suburb:</strong> ${escapeHtml((address == null ? void 0 : address.suburb) || "Not provided")}</div>
+        <div><strong>City:</strong> ${escapeHtml((address == null ? void 0 : address.city) || "Not provided")}</div>
+        <div><strong>Province:</strong> ${escapeHtml((address == null ? void 0 : address.province) || "Not provided")}</div>
+        <div><strong>Postal Code:</strong> ${escapeHtml((address == null ? void 0 : address.postalCode) || "Not provided")}</div>
+
+        <div style="font-weight: 600; color: #111827; margin: 12px 0 6px 0;">Complexes</div>
+        ${complexesHtml}
+      </div>
+
+      <div style="padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 6px;">
+        <h2 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">Meter & Unit Details</h2>
+        ${metersHtml}
+      </div>
+    </div>
+  `;
+  const textLines = [];
+  textLines.push("Registration Summary");
+  textLines.push(`Generated on: ${generatedOn}`);
+  textLines.push("");
+  textLines.push("Registration Type");
+  textLines.push(`- Type: ${getRegistrationTypeLabel(type) || "Not provided"}`);
+  textLines.push("");
+  textLines.push("Personal Information");
+  textLines.push(`- First Name: ${(personal == null ? void 0 : personal.firstName) || "Not provided"}`);
+  textLines.push(`- Last Name: ${(personal == null ? void 0 : personal.lastName) || "Not provided"}`);
+  textLines.push(`- Email Address: ${(personal == null ? void 0 : personal.email) || "Not provided"}`);
+  textLines.push(`- Phone Number: ${(personal == null ? void 0 : personal.phone) || "Not provided"}`);
+  textLines.push(`- ID Number: ${(personal == null ? void 0 : personal.idNumber) || "Not provided"}`);
+  textLines.push(`- Date of Birth: ${formatDateText(personal == null ? void 0 : personal.dateOfBirth)}`);
+  textLines.push("");
+  textLines.push("Documents");
+  textLines.push(`- ID Document: ${((_a = documents == null ? void 0 : documents.idDocument) == null ? void 0 : _a.name) || "Not provided"}`);
+  textLines.push(`- Proof of Address: ${((_b = documents == null ? void 0 : documents.proofOfAddress) == null ? void 0 : _b.name) || "Not provided"}`);
+  textLines.push(`- Bank Confirmation: ${((_c = documents == null ? void 0 : documents.bankStatement) == null ? void 0 : _c.name) || "Not provided"}`);
+  if (Array.isArray(documents == null ? void 0 : documents.additionalDocuments) && documents.additionalDocuments.length) {
+    textLines.push("- Additional Documents:");
+    documents.additionalDocuments.forEach((d, idx) => {
+      textLines.push(`  - ${idx + 1}. ${(d == null ? void 0 : d.name) || "Not provided"}`);
+    });
+  }
+  textLines.push("");
+  textLines.push("Banking Details");
+  textLines.push(`- Account Holder: ${(banking == null ? void 0 : banking.accountHolder) || "Not provided"}`);
+  textLines.push(`- Bank Name: ${(banking == null ? void 0 : banking.bankName) || "Not provided"}`);
+  textLines.push(`- Account Type: ${(banking == null ? void 0 : banking.accountType) ? getAccountTypeLabel(banking.accountType) : "Not provided"}`);
+  textLines.push(`- Branch Code: ${(banking == null ? void 0 : banking.branchCode) || "Not provided"}`);
+  textLines.push(`- Account Number: ${(banking == null ? void 0 : banking.accountNumber) || "Not provided"}`);
+  textLines.push("");
+  textLines.push("Address Details");
+  textLines.push("- Main Business Address");
+  textLines.push(`  - Street Address: ${(address == null ? void 0 : address.streetAddress) || "Not provided"}`);
+  textLines.push(`  - Suburb: ${(address == null ? void 0 : address.suburb) || "Not provided"}`);
+  textLines.push(`  - City: ${(address == null ? void 0 : address.city) || "Not provided"}`);
+  textLines.push(`  - Province: ${(address == null ? void 0 : address.province) || "Not provided"}`);
+  textLines.push(`  - Postal Code: ${(address == null ? void 0 : address.postalCode) || "Not provided"}`);
+  textLines.push("- Complexes");
+  if (Array.isArray(address == null ? void 0 : address.complexes) && address.complexes.length) {
+    address.complexes.forEach((c, idx) => {
+      var _a2;
+      textLines.push(`  - Complex ${idx + 1}:`);
+      textLines.push(`    - Name: ${(c == null ? void 0 : c.name) || "Not provided"}`);
+      textLines.push(`    - Number of Units: ${(_a2 = c == null ? void 0 : c.unitCount) != null ? _a2 : "Not provided"}`);
+      textLines.push(`    - Address: ${(c == null ? void 0 : c.address) || "Not provided"}`);
+    });
+  } else {
+    textLines.push("  - No complexes added");
+  }
+  textLines.push("");
+  textLines.push("Meter & Unit Details");
+  if (Array.isArray(meters) && meters.length) {
+    meters.forEach((m, idx) => {
+      const unit = (m == null ? void 0 : m.unit) || {};
+      const tenant = (unit == null ? void 0 : unit.tenant) || {};
+      textLines.push(`- Meter ${idx + 1}:`);
+      textLines.push(`  - Meter Number: ${(m == null ? void 0 : m.meterNumber) || "Not provided"}`);
+      textLines.push(`  - Utility Type: ${(m == null ? void 0 : m.utilityType) || "Not provided"}`);
+      textLines.push(`  - Location: ${(m == null ? void 0 : m.location) || "Not provided"}`);
+      textLines.push(`  - Status: ${(m == null ? void 0 : m.isActive) === false ? "Inactive" : "Active"}`);
+      textLines.push(`  - Unit Number: ${(unit == null ? void 0 : unit.unitNumber) || "Not provided"}`);
+      textLines.push(`  - Unit Type: ${(unit == null ? void 0 : unit.unitType) || "Not provided"}`);
+      if (unit == null ? void 0 : unit.hasTenant) {
+        textLines.push("  - Tenant Information:");
+        textLines.push(`    - Name: ${(tenant == null ? void 0 : tenant.name) || "Not provided"}`);
+        textLines.push(`    - Phone: ${(tenant == null ? void 0 : tenant.phone) || "Not provided"}`);
+        textLines.push(`    - Email: ${(tenant == null ? void 0 : tenant.email) || "Not provided"}`);
+        textLines.push(`    - Lease Period: ${formatDateText(tenant == null ? void 0 : tenant.leaseStart)} - ${formatDateText(tenant == null ? void 0 : tenant.leaseEnd)}`);
+      }
+    });
+  } else {
+    textLines.push("- No meters added");
+  }
+  return { html, text: textLines.join("\n") };
+};
 const registration_post = defineEventHandler(async (event) => {
   var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
   try {
@@ -2492,11 +2710,6 @@ const registration_post = defineEventHandler(async (event) => {
         })()
       }
     });
-    const pdfAttachment = pdfBase64 ? [{
-      filename: `registration-summary-${personal.firstName}-${personal.lastName}-${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}.pdf`,
-      content: stripDataUrlPrefix(pdfBase64) || void 0,
-      encoding: "base64"
-    }] : [];
     const documentAttachments = [];
     if (documents && typeof documents === "object") {
       const pushDocAttachment = (doc, fallbackName) => {
@@ -2521,19 +2734,14 @@ const registration_post = defineEventHandler(async (event) => {
       }
     }
     const customerName = `${personal.firstName} ${personal.lastName}`;
-    const officeEmailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <p style="font-size: 16px; color: #1f2937; margin-bottom: 20px;">
-          This is the Registration of <strong>${personal.firstName} ${personal.lastName}</strong>
-        </p>
-        <p style="font-size: 14px; color: #6b7280;">
-          Please find the registration details attached as a PDF.
-        </p>
-      </div>
-    `;
-    const officeEmailText = `This is the Registration of ${personal.firstName} ${personal.lastName}
-
-Please find the registration details attached as a PDF, along with copies of the original supporting documents.`;
+    const { html: officeEmailHtml, text: officeEmailText } = buildRegistrationDetailsEmail({
+      type,
+      personal,
+      banking,
+      address,
+      meters,
+      documents
+    });
     const officeRecipients = [
       "registrations@uvend.co.za",
       "shawaal@uvend.co.za",
@@ -2544,7 +2752,7 @@ Please find the registration details attached as a PDF, along with copies of the
       `Registration of ${personal.firstName} ${personal.lastName}`,
       officeEmailHtml,
       officeEmailText,
-      [...pdfAttachment, ...documentAttachments]
+      [...documentAttachments]
     );
     if (!emailResult.success) {
       console.error("Failed to send email to office:", emailResult.error);

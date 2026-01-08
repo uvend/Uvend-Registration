@@ -293,18 +293,6 @@ const buildDocumentsPayload = async () => {
 
 const handleSubmit = async () => {
     try {
-        // Generate PDF from Summary component
-        let pdfBase64 = null
-        if (currentComponentRef.value && typeof currentComponentRef.value.generatePDFBase64 === 'function') {
-            try {
-                pdfBase64 = await currentComponentRef.value.generatePDFBase64()
-                console.log('PDF generated successfully')
-            } catch (pdfError) {
-                console.error('Error generating PDF:', pdfError)
-                // Continue without PDF - don't block registration
-            }
-        }
-
         // Extract document metadata plus base64 content so originals can be emailed as attachments
         const documentsPayload = await buildDocumentsPayload()
 
@@ -314,8 +302,7 @@ const handleSubmit = async () => {
             banking: formData.value.banking,
             address: formData.value.address,
             meters: formData.value.meters,
-            documents: documentsPayload,
-            pdfBase64: pdfBase64 // Include PDF if generated
+            documents: documentsPayload
         }
 
         const res = await $fetch('/api/registration', {

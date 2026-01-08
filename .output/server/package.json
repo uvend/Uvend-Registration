@@ -1,0 +1,10 @@
+{
+  "name": "registration-prod",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "ufo": "1.6.1",
+    "vue-bundle-renderer": "2.2.0"
+  }
+}

@@ -507,28 +507,6 @@ const submitRegistration = async () => {
   isSubmitting.value = true
   
   try {
-    // Generate PDF first
-    const html2pdf = (await import('html2pdf.js')).default
-    const pdfContent = await createPDFContent()
-    
-    const options = {
-      margin: [10, 10, 10, 10],
-      filename: `registration-summary-${new Date().toISOString().split('T')[0]}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }
-    
-    const pdfBlob = await html2pdf().from(pdfContent).set(options).outputPdf('blob')
-    
-    // Convert PDF blob to base64
-    const pdfBase64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result)
-      reader.onerror = reject
-      reader.readAsDataURL(pdfBlob)
-    })
-
     // Save to database and send emails (all handled by backend)
     const payload = {
       type: props.registrationData.type,
@@ -536,11 +514,10 @@ const submitRegistration = async () => {
       banking: props.registrationData.banking,
       address: props.registrationData.address,
       meters: props.registrationData.meters || [],
-      documents: props.registrationData.documents || {},
-      pdfBase64: pdfBase64 // Pass PDF as base64 to backend
+      documents: props.registrationData.documents || {}
     }
 
-    console.log('Submitting registration with PDF...')
+    console.log('Submitting registration...')
     
     const response = await $fetch('/api/registration', {
       method: 'POST',
