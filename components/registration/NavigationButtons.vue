@@ -23,7 +23,7 @@
       <Button
         type="submit"
         class="flex-1 md:flex-none min-w-0 md:min-w-[140px] h-10 md:h-11 px-3 md:px-5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-semibold text-sm md:text-base shadow-md hover:shadow-lg active:shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600"
-        :disabled="loading"
+        :disabled="loading || disabled"
       >
         <span v-if="loading" class="inline-flex items-center justify-center gap-1.5 md:gap-2 w-full">
           <Loader2 class="h-3.5 w-3.5 md:h-4 md:w-4 animate-spin flex-shrink-0" />
@@ -61,6 +61,10 @@ defineProps({
     default: false
   },
   loading: {
+    type: Boolean,
+    default: false
+  },
+  disabled: {
     type: Boolean,
     default: false
   }

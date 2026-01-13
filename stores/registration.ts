@@ -101,7 +101,7 @@ export const useRegistrationStore = defineStore('registration', {
         case 2: // Personal
           return !!(state.formData.personal.firstName && state.formData.personal.lastName && state.formData.personal.email)
         case 3: // Documents
-          return !!(state.formData.documents.idDocument && state.formData.documents.proofOfAddress)
+          return !!(state.formData.documents.idDocument && state.formData.documents.proofOfAddress && state.formData.documents.bankStatement)
         case 4: // Banking
           return !!(state.formData.banking.bankName && state.formData.banking.accountNumber && state.formData.banking.accountHolder && state.formData.banking.branchCode)
         case 5: // Address

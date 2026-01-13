@@ -446,7 +446,10 @@ watch(formData, emitDocuments, { deep: true, immediate: false })
 
 // Expose form data to parent
 defineExpose({
-  validate: () => true,
+  validate: () => {
+    // Required docs + file validation errors
+    return Object.keys(errors.value || {}).length === 0
+  },
   getData: () => formData.value,
   submit: () => {
     emitDocuments()

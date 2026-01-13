@@ -69,6 +69,7 @@
                             :show-prev="currentStep > 1"
                             :is-last-step="currentStep === effectiveSteps.length"
                             :loading="loading"
+                            :disabled="disableNext"
                             @prev="prevStep"
                         />
                     </div>
@@ -165,6 +166,21 @@ const currentComponent = computed(() => {
     return step?.component || null
 })
 
+const currentStepId = computed(() => {
+    const step = effectiveSteps.value[currentStep.value - 1]
+    return step?.id || null
+})
+
+const documentsComplete = computed(() => {
+    const docs = formData.value?.documents || {}
+    // Required docs per DocumentUpload UI
+    return !!(docs.idDocument && docs.proofOfAddress && docs.bankStatement)
+})
+
+const disableNext = computed(() => {
+    return currentStepId.value === 'documents' && !documentsComplete.value
+})
+
 const pairedComponent = computed(() => {
     if (!isLargeScreen.value) return null
     const step = steps5[currentStep.value - 1]
@@ -186,6 +202,21 @@ watch(currentStep, (value) => {
 })
 
 const handleStepComplete = async () => {
+    // Block progression on Documents step until all required uploads are provided
+    if (currentStepId.value === 'documents' && !documentsComplete.value) {
+        const nuxtApp = useNuxtApp()
+        if (nuxtApp.$toast) {
+          nuxtApp.$toast({
+            title: 'Missing documents',
+            description: 'Please upload ID Document, Proof of Address, and Bank Confirmation before continuing.',
+            variant: 'destructive'
+          })
+        } else {
+          alert('Please upload ID Document, Proof of Address, and Bank Confirmation before continuing.')
+        }
+        return
+    }
+
     loading.value = true
     try {
         // Get the current component instance using template ref
@@ -209,6 +240,15 @@ const handleStepComplete = async () => {
                 componentRef.submit()
             } catch (e) {
                 // Ignore validation failures to allow progression
+            }
+        }
+
+        // Enforce validation on Documents step (component exposes validate())
+        if (currentStepId.value === 'documents' && componentRef && typeof componentRef.validate === 'function') {
+            const ok = componentRef.validate()
+            if (!ok) {
+                loading.value = false
+                return
             }
         }
         
