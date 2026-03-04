@@ -200,6 +200,92 @@
             <CheckCircle class="h-4 w-4" />
           </span>
         </div>
+
+        <div class="pt-2 border-t border-gray-200">
+          <h4 class="text-base font-semibold text-gray-900 mb-4">Installer Details</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <Label for="installerName" class="flex items-center justify-between">
+                <span>Installer Name</span>
+                <span v-if="formData.installerName" class="text-xs text-gray-500">
+                  {{ formData.installerName.length }}/100 characters
+                </span>
+              </Label>
+              <Input
+                id="installerName"
+                v-model="formData.installerName"
+                type="text"
+                maxlength="100"
+                placeholder="Enter installer name"
+                class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
+                :class="{ 
+                  'border-green-500 focus:ring-green-500': isFieldValid('installerName')
+                }"
+                @input="markTouched('installerName')"
+              />
+              <span 
+                v-if="isFieldValid('installerName')" 
+                class="text-sm text-green-500 flex items-center gap-1"
+              >
+                <CheckCircle class="h-4 w-4" />
+              </span>
+            </div>
+
+            <div class="space-y-2">
+              <Label for="installerPhone" class="flex items-center justify-between">
+                <span>Installer Contact Number</span>
+                <span v-if="formData.installerPhone" class="text-xs text-gray-500">
+                  {{ formData.installerPhone.length }}/30 characters
+                </span>
+              </Label>
+              <Input
+                id="installerPhone"
+                v-model="formData.installerPhone"
+                type="text"
+                maxlength="30"
+                placeholder="Enter installer contact number"
+                class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
+                :class="{ 
+                  'border-green-500 focus:ring-green-500': isFieldValid('installerPhone')
+                }"
+                @input="markTouched('installerPhone')"
+              />
+              <span 
+                v-if="isFieldValid('installerPhone')" 
+                class="text-sm text-green-500 flex items-center gap-1"
+              >
+                <CheckCircle class="h-4 w-4" />
+              </span>
+            </div>
+
+            <div class="space-y-2 md:col-span-2">
+              <Label for="installerEmail" class="flex items-center justify-between">
+                <span>Installer Email Address</span>
+                <span v-if="formData.installerEmail" class="text-xs text-gray-500">
+                  {{ formData.installerEmail.length }}/100 characters
+                </span>
+              </Label>
+              <Input
+                id="installerEmail"
+                v-model="formData.installerEmail"
+                type="email"
+                maxlength="100"
+                placeholder="Enter installer email address"
+                class="bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl transition-all duration-200"
+                :class="{ 
+                  'border-green-500 focus:ring-green-500': isFieldValid('installerEmail')
+                }"
+                @input="markTouched('installerEmail')"
+              />
+              <span 
+                v-if="isFieldValid('installerEmail')" 
+                class="text-sm text-green-500 flex items-center gap-1"
+              >
+                <CheckCircle class="h-4 w-4" />
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Complexes -->
@@ -358,6 +444,9 @@ type AddressFormState = {
   city: string
   province: string
   postalCode: string
+  installerName: string
+  installerPhone: string
+  installerEmail: string
   complexes: ComplexFormState[]
 }
 
@@ -367,6 +456,9 @@ type AddressTouchedState = {
   city: boolean
   province: boolean
   postalCode: boolean
+  installerName: boolean
+  installerPhone: boolean
+  installerEmail: boolean
 }
 
 type ComplexFieldKey = keyof ComplexFormState
@@ -378,6 +470,9 @@ const defaultAddressState = (): AddressFormState => ({
   city: '',
   province: '',
   postalCode: '',
+  installerName: '',
+  installerPhone: '',
+  installerEmail: '',
   complexes: []
 })
 
@@ -388,7 +483,10 @@ const touched = reactive<AddressTouchedState>({
   suburb: false,
   city: false,
   province: false,
-  postalCode: false
+  postalCode: false,
+  installerName: false,
+  installerPhone: false,
+  installerEmail: false
 })
 const complexTouched = ref<ComplexTouchedState[]>([])
 

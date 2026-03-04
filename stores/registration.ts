@@ -29,6 +29,9 @@ export interface RegistrationFormData {
     city: string
     province: string
     postalCode: string
+    installerName: string
+    installerPhone: string
+    installerEmail: string
     complexes: Array<{
       name: string
       unitCount: number
@@ -87,6 +90,9 @@ export const useRegistrationStore = defineStore('registration', {
         city: '',
         province: '',
         postalCode: '',
+        installerName: '',
+        installerPhone: '',
+        installerEmail: '',
         complexes: []
       },
       meters: []
@@ -182,6 +188,9 @@ export const useRegistrationStore = defineStore('registration', {
           city: '',
           province: '',
           postalCode: '',
+          installerName: '',
+          installerPhone: '',
+          installerEmail: '',
           complexes: []
         },
         meters: []

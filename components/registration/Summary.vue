@@ -207,6 +207,24 @@
               </div>
             </div>
           </div>
+
+          <div class="mt-6">
+            <h4 class="font-semibold text-gray-900 mb-3">Installer Details</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <span class="text-sm font-medium text-gray-500">Installer Name</span>
+                <p class="mt-1 text-gray-900 font-medium">{{ registrationData.address?.installerName || 'Not provided' }}</p>
+              </div>
+              <div>
+                <span class="text-sm font-medium text-gray-500">Installer Contact Number</span>
+                <p class="mt-1 text-gray-900 font-medium">{{ registrationData.address?.installerPhone || 'Not provided' }}</p>
+              </div>
+              <div class="md:col-span-2">
+                <span class="text-sm font-medium text-gray-500">Installer Email Address</span>
+                <p class="mt-1 text-gray-900 font-medium">{{ registrationData.address?.installerEmail || 'Not provided' }}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Complexes -->
@@ -683,6 +701,13 @@ const createPDFContent = async () => {
           <p><strong>City:</strong> ${props.registrationData.address?.city || 'Not provided'}</p>
           <p><strong>Province:</strong> ${props.registrationData.address?.province || 'Not provided'}</p>
           <p><strong>Postal Code:</strong> ${props.registrationData.address?.postalCode || 'Not provided'}</p>
+        </div>
+
+        <h3 style="color: #374151; font-size: 16px; margin-bottom: 10px;">Installer Details</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+          <p><strong>Installer Name:</strong> ${props.registrationData.address?.installerName || 'Not provided'}</p>
+          <p><strong>Installer Contact Number:</strong> ${props.registrationData.address?.installerPhone || 'Not provided'}</p>
+          <p><strong>Installer Email Address:</strong> ${props.registrationData.address?.installerEmail || 'Not provided'}</p>
         </div>
         
         ${props.registrationData.address?.complexes?.length ? `

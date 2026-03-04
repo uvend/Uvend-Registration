@@ -378,7 +378,17 @@ const hasChanged = (current, next) => toPlain(current) !== toPlain(next)
 
 const personalKeys = ['firstName', 'lastName', 'email', 'phone', 'idNumber', 'dateOfBirth']
 const bankingKeys = ['accountHolder', 'bankName', 'accountNumber', 'accountType', 'branchCode']
-const addressKeys = ['streetAddress', 'suburb', 'city', 'province', 'postalCode', 'complexes']
+const addressKeys = [
+    'streetAddress',
+    'suburb',
+    'city',
+    'province',
+    'postalCode',
+    'installerName',
+    'installerPhone',
+    'installerEmail',
+    'complexes'
+]
 
 const handleDataChange = (data) => {
     const currentStepIndex = currentStep.value - 1
