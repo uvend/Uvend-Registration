@@ -61,6 +61,24 @@
           <p class="mt-1 text-gray-900 font-medium">{{ getRegistrationTypeLabel(registrationData.type) || 'Not specified' }}</p>
         </div>
       </div>
+
+      <div class="pt-4 border-t border-blue-100">
+        <h4 class="text-sm font-semibold text-gray-700 mb-3">Installer Details</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <span class="text-sm font-medium text-gray-500">Installer Name</span>
+            <p class="mt-1 text-gray-900 font-medium">{{ registrationData.address?.installerName || 'Not provided' }}</p>
+          </div>
+          <div>
+            <span class="text-sm font-medium text-gray-500">Installer Contact Number</span>
+            <p class="mt-1 text-gray-900 font-medium">{{ registrationData.address?.installerPhone || 'Not provided' }}</p>
+          </div>
+          <div class="md:col-span-2">
+            <span class="text-sm font-medium text-gray-500">Installer Email Address</span>
+            <p class="mt-1 text-gray-900 font-medium">{{ registrationData.address?.installerEmail || 'Not provided' }}</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Personal Information -->
@@ -641,6 +659,15 @@ const createPDFContent = async () => {
       <div style="margin-bottom: 25px;">
         <h2 style="color: #1e40af; font-size: 20px; margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px;">Registration Type</h2>
         <p><strong>Type:</strong> ${getRegistrationTypeLabel(props.registrationData.type) || 'Not specified'}</p>
+      </div>
+
+      <div style="margin-bottom: 25px;">
+        <h2 style="color: #1e40af; font-size: 20px; margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px;">Installer Details</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <p><strong>Installer Name:</strong> ${props.registrationData.address?.installerName || 'Not provided'}</p>
+          <p><strong>Installer Contact Number:</strong> ${props.registrationData.address?.installerPhone || 'Not provided'}</p>
+          <p><strong>Installer Email Address:</strong> ${props.registrationData.address?.installerEmail || 'Not provided'}</p>
+        </div>
       </div>
       
       <div style="margin-bottom: 25px;">

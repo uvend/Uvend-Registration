@@ -412,6 +412,13 @@ const buildRegistrationDetailsEmail = (payload: {
       </div>
 
       <div style="padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 14px;">
+        <h2 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">Installer Details</h2>
+        <div><strong>Installer Name:</strong> ${escapeHtml(address?.installerName || 'Not provided')}</div>
+        <div><strong>Installer Contact Number:</strong> ${escapeHtml(address?.installerPhone || 'Not provided')}</div>
+        <div><strong>Installer Email Address:</strong> ${escapeHtml(address?.installerEmail || 'Not provided')}</div>
+      </div>
+
+      <div style="padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 14px;">
         <h2 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">Personal Information</h2>
         <div><strong>First Name:</strong> ${escapeHtml(personal?.firstName || 'Not provided')}</div>
         <div><strong>Last Name:</strong> ${escapeHtml(personal?.lastName || 'Not provided')}</div>
@@ -475,6 +482,11 @@ const buildRegistrationDetailsEmail = (payload: {
   textLines.push('')
   textLines.push('Registration Type')
   textLines.push(`- Type: ${getRegistrationTypeLabel(type) || 'Not provided'}`)
+  textLines.push('')
+  textLines.push('Installer Details')
+  textLines.push(`- Installer Name: ${address?.installerName || 'Not provided'}`)
+  textLines.push(`- Installer Contact Number: ${address?.installerPhone || 'Not provided'}`)
+  textLines.push(`- Installer Email Address: ${address?.installerEmail || 'Not provided'}`)
   textLines.push('')
   textLines.push('Personal Information')
   textLines.push(`- First Name: ${personal?.firstName || 'Not provided'}`)
@@ -732,6 +744,12 @@ export default defineEventHandler(async (event) => {
         <p>Thank you for registering with U-Vend! Your registration has been successfully submitted.</p>
         <p>We have received your registration details and our team will review your submission. An agent will reach out to you shortly to complete the registration process.</p>
         <p>Please find the U-Vend Terms and Conditions attached for your records.</p>
+        <div style="margin: 16px 0; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px;">
+          <div style="font-weight: 600; color: #111827; margin-bottom: 6px;">Installer Details</div>
+          <div><strong>Installer Name:</strong> ${escapeHtml(address?.installerName || 'Not provided')}</div>
+          <div><strong>Installer Contact Number:</strong> ${escapeHtml(address?.installerPhone || 'Not provided')}</div>
+          <div><strong>Installer Email Address:</strong> ${escapeHtml(address?.installerEmail || 'Not provided')}</div>
+        </div>
         <p>If you have any questions or need assistance, please don't hesitate to contact us.</p>
         <p>Best regards,<br>U-Vend Team</p>
         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
@@ -749,6 +767,11 @@ Thank you for registering with U-Vend! Your registration has been successfully s
 We have received your registration details and our team will review your submission. An agent will reach out to you shortly to complete the registration process.
 
 Please find the U-Vend Terms and Conditions attached for your records.
+
+Installer Details
+- Installer Name: ${address?.installerName || 'Not provided'}
+- Installer Contact Number: ${address?.installerPhone || 'Not provided'}
+- Installer Email Address: ${address?.installerEmail || 'Not provided'}
 
 If you have any questions or need assistance, please don't hesitate to contact us.
 
