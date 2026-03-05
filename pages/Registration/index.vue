@@ -177,8 +177,19 @@ const documentsComplete = computed(() => {
     return !!(docs.idDocument && docs.proofOfAddress && docs.bankStatement)
 })
 
+const metersComplete = computed(() => {
+    const meters = formData.value?.meters
+    return Array.isArray(meters) && meters.length > 0
+})
+
 const disableNext = computed(() => {
-    return currentStepId.value === 'documents' && !documentsComplete.value
+    if (currentStepId.value === 'documents') {
+        return !documentsComplete.value
+    }
+    if (currentStepId.value === 'meters' || currentStepId.value === 'address-meters') {
+        return !metersComplete.value
+    }
+    return false
 })
 
 const pairedComponent = computed(() => {
@@ -213,6 +224,21 @@ const handleStepComplete = async () => {
           })
         } else {
           alert('Please upload ID Document, Proof of Address, and Bank Confirmation before continuing.')
+        }
+        return
+    }
+
+    // Block progression if no meters are provided
+    if ((currentStepId.value === 'meters' || currentStepId.value === 'address-meters') && !metersComplete.value) {
+        const nuxtApp = useNuxtApp()
+        if (nuxtApp.$toast) {
+          nuxtApp.$toast({
+            title: 'Missing meter details',
+            description: 'Please add at least one meter before continuing.',
+            variant: 'destructive'
+          })
+        } else {
+          alert('Please add at least one meter before continuing.')
         }
         return
     }
